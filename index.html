@@ -352,20 +352,6 @@ let products = JSON.parse(localStorage.getItem('dg_products') || '[]');
 const tasaBCV = parseFloat(localStorage.getItem('dg_tasa') || '560');
 let cart = JSON.parse(localStorage.getItem('dg_cart') || '[]');
 
-// Seed products
-if (products.length === 0) {
-  products = [
-    {id:1,nombre:'Carburador PE24 completo',sku:'DGM-001',categoria:'Motor',tipo:'Original',marcaRep:'Mikuni',marcaMoto:'Honda',modelo:'Wave · Fan · XR',cilindraje:'125cc',descripcion:'Carburador original japonés, incluye jets y flotador. Compatible con Honda Wave y Fan 125cc 2015-2024.',precio:28.50,stock:12,stockMin:3,descuento:0,peso:0.38,largo:12,ancho:8,alto:9,publicado:true},
-    {id:2,nombre:'Kit de pistón 50mm std',sku:'DGM-002',categoria:'Motor',tipo:'Alternativo',marcaRep:'Top1',marcaMoto:'Yamaha',modelo:'Crux · Crypton',cilindraje:'110cc',descripcion:'Kit completo: pistón, anillos, pines y clips. Para Yamaha Crux y Crypton 110cc.',precio:14.00,stock:2,stockMin:3,descuento:10,peso:0.52,largo:8,ancho:8,alto:6,publicado:true},
-    {id:3,nombre:'Bobina de encendido CDI',sku:'DGM-003',categoria:'Eléctrico',tipo:'Alternativo',marcaRep:'Daikin',marcaMoto:'Múltiples marcas',modelo:'Universal 125cc',cilindraje:'125cc',descripcion:'CDI universal compatible con la mayoría de motos 125cc chinas y japonesas.',precio:8.00,stock:0,stockMin:2,descuento:0,peso:0.15,largo:7,ancho:4,alto:3,publicado:true},
-    {id:4,nombre:'Pastillas de freno delanteras',sku:'DGM-004',categoria:'Frenos',tipo:'Original',marcaRep:'Brembo',marcaMoto:'Honda',modelo:'CBF150 · CB190',cilindraje:'150cc',descripcion:'Par de pastillas de freno disco delantero originales Brembo.',precio:11.00,stock:8,stockMin:4,descuento:0,peso:0.21,largo:9,ancho:5,alto:2,publicado:true},
-    {id:5,nombre:'Amortiguador trasero YSS',sku:'DGM-005',categoria:'Suspensión',tipo:'Alternativo',marcaRep:'YSS',marcaMoto:'Yamaha',modelo:'Fazer · Ys250',cilindraje:'250cc',descripcion:'Amortiguador trasero ajustable con 5 posiciones de dureza. Mejora notablemente el confort y el agarre.',precio:45.00,stock:3,stockMin:2,descuento:5,peso:1.20,largo:32,ancho:6,alto:6,publicado:true},
-    {id:6,nombre:'Relay de arranque 12V 80A',sku:'DGM-006',categoria:'Eléctrico',tipo:'Genérico',marcaRep:'',marcaMoto:'Múltiples marcas',modelo:'Universal',cilindraje:'Todos',descripcion:'Relay de arranque universal 12V 80A para motos.',precio:3.50,stock:20,stockMin:5,descuento:0,peso:0.08,largo:5,ancho:4,alto:3,publicado:true},
-    {id:7,nombre:'Plato de embrague Daytona',sku:'DGM-007',categoria:'Transmisión',tipo:'Original',marcaRep:'Daytona',marcaMoto:'Daytona',modelo:'DTN200 · DTN250',cilindraje:'200cc',descripcion:'Plato de embrague original Daytona, incluye discos y resortes de presión.',precio:22.00,stock:5,stockMin:2,descuento:0,peso:0.65,largo:15,ancho:15,alto:4,publicado:true},
-  ];
-  localStorage.setItem('dg_products', JSON.stringify(products));
-}
-
 // Only show published products
 const pub = products.filter(p => p.publicado !== false);
 
@@ -485,6 +471,11 @@ function renderProducts() {
   const list = getFiltered();
   const grid = document.getElementById('products-grid');
   document.getElementById('products-count').innerHTML = `<strong>${list.length}</strong> productos encontrados`;
+
+  if (!pub.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="ei">🔧</div><p>Catálogo en construcción, vuelve pronto 🔧</p></div>`;
+    return;
+  }
 
   if (!list.length) {
     grid.innerHTML = `<div class="empty-state"><div class="ei">🔍</div><p>No encontramos repuestos con esos filtros.<br><button onclick="clearFilters()" style="color:var(--red);background:none;border:none;cursor:pointer;font-size:14px;margin-top:8px">Limpiar filtros</button></p></div>`;

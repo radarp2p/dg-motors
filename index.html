@@ -352,6 +352,20 @@ let products = JSON.parse(localStorage.getItem('dg_products') || '[]');
 const tasaBCV = parseFloat(localStorage.getItem('dg_tasa') || '560');
 let cart = JSON.parse(localStorage.getItem('dg_cart') || '[]');
 
+// ── SEED (fallback cuando localStorage está vacío) ─────
+if (products.length === 0) {
+  products = [
+    {id:1,nombre:'Carburador PE24 completo',sku:'DGM-001',categoria:'Motor',tipo:'Original',marcaRep:'Mikuni',marcaMoto:'Honda',modelo:'Wave · Fan · XR',añoDesde:2015,añoHasta:2024,cilindraje:'125cc',oem:'16100-GFC-671',descripcion:'Carburador original japonés, incluye jets y flotador.',precio:28.50,stock:12,stockMin:3,descuento:0,ubicacion:'A1',peso:0.380,largo:12,ancho:8,alto:9,publicado:true,fecha:'2024-10-01',medios:[]},
+    {id:2,nombre:'Kit de pistón 50mm std',sku:'DGM-002',categoria:'Motor',tipo:'Alternativo',marcaRep:'Top1',marcaMoto:'Yamaha',modelo:'Crux · Crypton',añoDesde:2018,añoHasta:2024,cilindraje:'110cc',oem:'',descripcion:'Kit completo: pistón, anillos, pines y clips.',precio:14.00,stock:2,stockMin:3,descuento:10,ubicacion:'A2',peso:0.520,largo:8,ancho:8,alto:6,publicado:true,fecha:'2024-10-03',medios:[]},
+    {id:3,nombre:'Bobina de encendido CDI',sku:'DGM-003',categoria:'Eléctrico',tipo:'Alternativo',marcaRep:'Daikin',marcaMoto:'Múltiples marcas',modelo:'Universal 125cc',añoDesde:2010,añoHasta:2024,cilindraje:'125cc',oem:'',descripcion:'CDI universal compatible con motos 125cc.',precio:8.00,stock:0,stockMin:2,descuento:0,ubicacion:'B3',peso:0.150,largo:7,ancho:4,alto:3,publicado:true,fecha:'2024-10-05',medios:[]},
+    {id:4,nombre:'Pastillas de freno delanteras',sku:'DGM-004',categoria:'Frenos',tipo:'Original',marcaRep:'Brembo',marcaMoto:'Honda',modelo:'CBF150 · CB190',añoDesde:2016,añoHasta:2024,cilindraje:'150cc',oem:'06455-KVK-405',descripcion:'Par de pastillas de freno disco delantero.',precio:11.00,stock:8,stockMin:4,descuento:0,ubicacion:'C1',peso:0.210,largo:9,ancho:5,alto:2,publicado:true,fecha:'2024-10-10',medios:[]},
+    {id:5,nombre:'Amortiguador trasero YSS',sku:'DGM-005',categoria:'Suspensión',tipo:'Alternativo',marcaRep:'YSS',marcaMoto:'Yamaha',modelo:'Fazer · Ys250',añoDesde:2019,añoHasta:2024,cilindraje:'250cc',oem:'',descripcion:'Amortiguador trasero con 5 posiciones de ajuste.',precio:45.00,stock:3,stockMin:2,descuento:5,ubicacion:'D2',peso:1.200,largo:32,ancho:6,alto:6,publicado:true,fecha:'2024-10-12',medios:[]},
+    {id:6,nombre:'Relay de arranque 12V 80A',sku:'DGM-006',categoria:'Eléctrico',tipo:'Genérico',marcaRep:'',marcaMoto:'Múltiples marcas',modelo:'Universal',añoDesde:2000,añoHasta:2024,cilindraje:'Todos',oem:'',descripcion:'Relay de arranque universal 12V para motos.',precio:3.50,stock:20,stockMin:5,descuento:0,ubicacion:'B1',peso:0.080,largo:5,ancho:4,alto:3,publicado:true,fecha:'2024-10-14',medios:[]},
+    {id:7,nombre:'Plato de embrague Daytona',sku:'DGM-007',categoria:'Transmisión',tipo:'Original',marcaRep:'Daytona',marcaMoto:'Daytona',modelo:'DTN200 · DTN250',añoDesde:2020,añoHasta:2024,cilindraje:'200cc',oem:'DTN-200-CL-01',descripcion:'Plato de embrague original, incluye discos y resortes.',precio:22.00,stock:5,stockMin:2,descuento:0,ubicacion:'E3',peso:0.650,largo:15,ancho:15,alto:4,publicado:true,fecha:'2024-10-16',medios:[]},
+  ];
+  localStorage.setItem('dg_products', JSON.stringify(products));
+}
+
 // Only show published products
 const pub = products.filter(p => p.publicado !== false);
 

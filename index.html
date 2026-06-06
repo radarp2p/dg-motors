@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DG Motors — Repuestos Venezuela</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:#D42B2B;--red-dark:#A01E1E;--red-light:#FFF0F0;
+    --dark:#111;--charcoal:#1A1A1A;
+    --white:#FFFFFF;--offwhite:#F8F7F4;--text:#1A1A1A;--muted:#666;
+    --border:#E5E5E5;--surface:#F2F1EE;
+    --green:#16A34A;--amber:#B45309;
+    --font:'Barlow',sans-serif;--font-display:'Barlow Condensed',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--offwhite);color:var(--text);min-height:100vh}
+  a{text-decoration:none;color:inherit}
+  img{max-width:100%}
+
+  /* HEADER */
+  .header{background:var(--dark);color:#fff;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--red)}
+  .header-inner{max-width:1200px;margin:0 auto;padding:0 20px;height:60px;display:flex;align-items:center;gap:20px}
+  .logo{font-family:var(--font-display);font-size:24px;font-weight:800;letter-spacing:2px;cursor:pointer}
+  .logo span{color:var(--red)}
+  .header-search{flex:1;max-width:400px;position:relative}
+  .header-search input{width:100%;background:#2A2A2A;border:1px solid #3A3A3A;border-radius:4px;padding:8px 14px 8px 36px;color:#fff;font-family:var(--font);font-size:14px;outline:none;transition:border .15s}
+  .header-search input:focus{border-color:var(--red)}
+  .header-search input::placeholder{color:#888}
+  .hs-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:#888;font-size:16px}
+  .header-nav{display:flex;gap:4px;margin-left:auto}
+  .hn-item{padding:6px 14px;border-radius:4px;font-size:13px;font-weight:600;cursor:pointer;color:#aaa;transition:all .15s;letter-spacing:.3px;border:none;background:none}
+  .hn-item:hover{color:#fff}
+  .cart-btn{background:var(--red);color:#fff;border:none;border-radius:4px;padding:7px 16px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:8px;letter-spacing:.3px;transition:background .15s;position:relative}
+  .cart-btn:hover{background:var(--red-dark)}
+  .cart-count{background:#fff;color:var(--red);border-radius:50%;width:18px;height:18px;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+  /* HERO */
+  .hero{background:var(--dark);color:#fff;padding:48px 20px;border-bottom:1px solid #2A2A2A}
+  .hero-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:40px;align-items:center}
+  .hero-tag{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:10px}
+  .hero-title{font-family:var(--font-display);font-size:48px;font-weight:800;line-height:1.05;letter-spacing:1px;margin-bottom:12px}
+  .hero-title span{color:var(--red)}
+  .hero-sub{font-size:15px;color:#aaa;line-height:1.6;max-width:480px;margin-bottom:20px}
+  .hero-chips{display:flex;gap:8px;flex-wrap:wrap}
+  .hero-chip{background:#2A2A2A;color:#ccc;border-radius:20px;padding:5px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;border:1px solid #3A3A3A}
+  .hero-chip:hover,.hero-chip.active{background:var(--red);color:#fff;border-color:var(--red)}
+  .hero-stats{display:flex;flex-direction:column;gap:16px;text-align:center}
+  .hs-num{font-family:var(--font-display);font-size:36px;font-weight:800;color:var(--red)}
+  .hs-lbl{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:.8px}
+
+  /* MAIN LAYOUT */
+  .store-layout{max-width:1200px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:220px 1fr;gap:24px}
+
+  /* FILTERS SIDEBAR */
+  .filters{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:16px;height:fit-content;position:sticky;top:72px}
+  .filter-title{font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+  .filter-section{margin-bottom:18px}
+  .filter-opt{display:flex;align-items:center;justify-content:space-between;padding:5px 8px;border-radius:4px;cursor:pointer;font-size:13px;color:var(--text);transition:background .12s;user-select:none}
+  .filter-opt:hover{background:var(--surface)}
+  .filter-opt.active{background:var(--red-light);color:var(--red);font-weight:600}
+  .fo-count{font-size:11px;color:var(--muted);background:var(--surface);padding:1px 6px;border-radius:8px}
+  .filter-opt.active .fo-count{background:var(--red);color:#fff}
+  .price-range{display:flex;gap:8px;align-items:center;margin-top:8px}
+  .price-input{width:80px;border:1px solid var(--border);border-radius:4px;padding:6px 8px;font-family:var(--font);font-size:12px;color:var(--text);outline:none;background:var(--white)}
+  .price-input:focus{border-color:var(--red)}
+  .clear-filters{width:100%;padding:7px;border:1px solid var(--border);border-radius:4px;background:none;font-family:var(--font);font-size:12px;color:var(--muted);cursor:pointer;margin-top:4px;transition:all .15s}
+  .clear-filters:hover{border-color:var(--red);color:var(--red)}
+
+  /* PRODUCTS */
+  .products-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+  .products-count{font-size:14px;color:var(--muted)}
+  .products-count strong{color:var(--text)}
+  .sort-select{border:1px solid var(--border);border-radius:4px;padding:7px 12px;font-family:var(--font);font-size:13px;color:var(--text);outline:none;cursor:pointer;background:var(--white)}
+
+  .products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+
+  /* PRODUCT CARD */
+  .product-card{background:var(--white);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:all .2s;display:flex;flex-direction:column}
+  .product-card:hover{border-color:#aaa;transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+  .product-card.out-of-stock{opacity:.65}
+  .pc-img{background:var(--surface);height:150px;display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;border-bottom:1px solid var(--border)}
+  .pc-badge{position:absolute;top:8px;left:8px;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+  .badge-original{background:#0D2B0D;color:var(--green)}
+  .badge-alternativo{background:#0D1A2A;color:#5B9BD5}
+  .badge-descuento{position:absolute;top:8px;right:8px;background:var(--red);color:#fff;padding:3px 8px;border-radius:3px;font-size:10px;font-weight:700}
+  .badge-agotado{background:#2A0D0D;color:#E74C3C}
+  .pc-body{padding:12px;flex:1;display:flex;flex-direction:column;gap:6px}
+  .pc-cat{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted)}
+  .pc-name{font-size:14px;font-weight:700;color:var(--text);line-height:1.3;flex:1}
+  .pc-compat{font-size:11px;color:var(--muted)}
+  .pc-price{display:flex;align-items:baseline;gap:6px;margin-top:4px}
+  .pc-usd{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--text)}
+  .pc-old{font-size:12px;color:var(--muted);text-decoration:line-through}
+  .pc-bs{font-size:11px;color:var(--muted);display:block;margin-top:1px}
+  .pc-foot{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px}
+  .add-cart-btn{flex:1;background:var(--red);color:#fff;border:none;border-radius:4px;padding:8px;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;letter-spacing:.3px}
+  .add-cart-btn:hover{background:var(--red-dark)}
+  .add-cart-btn:disabled{background:#ccc;cursor:not-allowed}
+  .detail-btn{border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-size:12px;cursor:pointer;background:none;color:var(--muted);transition:all .15s}
+  .detail-btn:hover{border-color:#aaa;color:var(--text)}
+
+  /* CART DRAWER */
+  .cart-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300}
+  .cart-overlay.open{display:block;animation:fo .2s}
+  @keyframes fo{from{opacity:0}to{opacity:1}}
+  .cart-drawer{position:fixed;right:0;top:0;bottom:0;width:380px;background:var(--white);z-index:301;display:flex;flex-direction:column;animation:sd .25s;box-shadow:-4px 0 20px rgba(0,0,0,.15)}
+  @keyframes sd{from{transform:translateX(100%)}to{transform:translateX(0)}}
+  .cart-header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .cart-title{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:1px}
+  .cart-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);padding:4px}
+  .cart-close:hover{color:var(--text)}
+  .cart-items{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:12px}
+  .cart-item{display:flex;gap:12px;padding:12px;background:var(--surface);border-radius:6px;border:1px solid var(--border)}
+  .ci-icon{width:44px;height:44px;background:var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .ci-name{font-size:13px;font-weight:600;line-height:1.3;margin-bottom:4px}
+  .ci-sku{font-size:11px;color:var(--muted);font-family:monospace}
+  .ci-controls{display:flex;align-items:center;gap:8px;margin-top:6px}
+  .qty-btn{width:26px;height:26px;border-radius:4px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s}
+  .qty-btn:hover{border-color:var(--red);color:var(--red)}
+  .qty-val{font-size:14px;font-weight:700;min-width:24px;text-align:center}
+  .ci-price{font-family:var(--font-display);font-size:15px;font-weight:700;margin-left:auto;align-self:flex-start;white-space:nowrap}
+  .ci-remove{background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:2px;margin-left:4px}
+  .ci-remove:hover{color:#E74C3C}
+  .cart-empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .cart-footer{padding:16px 20px;border-top:1px solid var(--border)}
+  .cart-total-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid var(--border);margin-bottom:6px}
+  .cart-total-final{font-family:var(--font-display);font-size:22px;font-weight:700}
+  .cart-total-bs{font-size:12px;color:var(--muted)}
+  .checkout-btn{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:6px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;margin-top:12px;letter-spacing:.5px;transition:background .15s}
+  .checkout-btn:hover{background:var(--red-dark)}
+
+  /* CHECKOUT MODAL */
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:400;align-items:center;justify-content:center;padding:20px;overflow-y:auto}
+  .modal-backdrop.open{display:flex;animation:fo .15s}
+  .modal{background:var(--white);border-radius:10px;width:100%;max-width:560px;animation:su .2s;margin:auto}
+  @keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .modal-title{font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:1px}
+  .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted)}
+  .modal-close:hover{color:var(--text)}
+  .modal-body{padding:24px}
+  .modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px}
+
+  .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+  .form-label{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  .form-input{border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;transition:border .15s;width:100%}
+  .form-input:focus{border-color:var(--red)}
+  .form-input::placeholder{color:#bbb}
+  select.form-input{cursor:pointer}
+  .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .form-section{font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin:18px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
+  .pago-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}
+  .pago-opt{border:2px solid var(--border);border-radius:6px;padding:10px 12px;cursor:pointer;transition:all .15s}
+  .pago-opt:hover{border-color:#aaa}
+  .pago-opt.selected{border-color:var(--red);background:var(--red-light)}
+  .pago-opt .po-title{font-size:13px;font-weight:700;margin-bottom:2px}
+  .pago-opt .po-sub{font-size:11px;color:var(--muted)}
+
+  /* ORDER SUMMARY */
+  .order-summary{background:var(--surface);border-radius:6px;padding:14px;margin-bottom:16px}
+  .os-item{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid var(--border)}
+  .os-item:last-child{border-bottom:none;padding-top:10px;font-weight:700;font-size:15px}
+
+  /* SUCCESS */
+  .success-screen{text-align:center;padding:32px 0}
+  .success-icon{font-size:56px;margin-bottom:16px}
+  .success-title{font-family:var(--font-display);font-size:26px;font-weight:700;margin-bottom:8px}
+  .success-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+  .wa-confirm-btn{display:inline-flex;align-items:center;gap:8px;background:#075e54;color:#fff;border:none;border-radius:6px;padding:12px 24px;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;text-decoration:none;transition:background .15s}
+  .wa-confirm-btn:hover{background:#128c7e}
+
+  /* PRODUCT DETAIL MODAL */
+  .pd-img{background:var(--surface);height:180px;display:flex;align-items:center;justify-content:center;font-size:72px;border-radius:6px;margin-bottom:16px}
+  .pd-specs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0}
+  .pd-spec{background:var(--surface);border-radius:4px;padding:8px 12px}
+  .pd-spec-key{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+  .pd-spec-val{font-size:13px;font-weight:600;color:var(--text)}
+
+  /* EMPTY */
+  .empty-state{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty-state .ei{font-size:48px;margin-bottom:12px}
+
+  /* FOOTER */
+  .footer{background:var(--dark);color:#888;text-align:center;padding:24px 20px;font-size:13px;margin-top:40px;border-top:3px solid var(--red)}
+  .footer strong{color:#fff}
+
+  /* RESPONSIVE */
+  @media(max-width:700px){
+    .store-layout{grid-template-columns:1fr}
+    .filters{display:none}
+    .hero-inner{grid-template-columns:1fr}
+    .hero-stats{display:none}
+    .hero-title{font-size:32px}
+    .cart-drawer{width:100%}
+  }
+
+  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--dark);color:#fff;padding:12px 24px;border-radius:6px;font-size:14px;font-weight:600;z-index:999;display:none;animation:su .2s;border-bottom:3px solid var(--red)}
+  .toast.show{display:block}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo" onclick="clearFilters()">DG <span>MOTORS</span></div>
+    <div class="header-search">
+      <span class="hs-icon">🔍</span>
+      <input type="text" id="header-search" placeholder="Buscar repuesto, modelo, marca..." oninput="onSearch()">
+    </div>
+    <nav class="header-nav">
+      <button class="hn-item" onclick="scrollToSection()">Catálogo</button>
+      <button class="hn-item" onclick="document.getElementById('contacto').scrollIntoView({behavior:'smooth'})">Contacto</button>
+    </nav>
+    <button class="cart-btn" onclick="openCart()">
+      🛒 Carrito
+      <span class="cart-count" id="cart-count">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <div class="hero-tag">Venezuela · Repuestos de calidad</div>
+      <h1 class="hero-title">Tu moto merece<br>los mejores <span>repuestos</span></h1>
+      <p class="hero-sub">Catálogo completo de repuestos para motos. Precios en USD y bolívares. Envíos a todo el país por MRW, Zoom y Domesa.</p>
+      <div class="hero-chips" id="hero-chips">
+        <div class="hero-chip active" onclick="filterHero('',this)">Todos</div>
+        <div class="hero-chip" onclick="filterHero('Motor',this)">Motor</div>
+        <div class="hero-chip" onclick="filterHero('Eléctrico',this)">Eléctrico</div>
+        <div class="hero-chip" onclick="filterHero('Frenos',this)">Frenos</div>
+        <div class="hero-chip" onclick="filterHero('Suspensión',this)">Suspensión</div>
+        <div class="hero-chip" onclick="filterHero('Transmisión',this)">Transmisión</div>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hs-num" id="hero-num-prod">0</div><div class="hs-lbl">Productos</div></div>
+      <div><div class="hs-num">📦</div><div class="hs-lbl">Envío nacional</div></div>
+      <div><div class="hs-num">💬</div><div class="hs-lbl">WhatsApp</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- STORE -->
+<div class="store-layout" id="catalogo">
+
+  <!-- SIDEBAR FILTERS -->
+  <aside class="filters">
+    <div class="filter-section">
+      <div class="filter-title">Categoría</div>
+      <div id="cat-filters"></div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Marca de moto</div>
+      <div id="marca-filters"></div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Tipo de repuesto</div>
+      <div id="tipo-filters"></div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Precio (USD)</div>
+      <div class="price-range">
+        <input type="number" class="price-input" id="price-min" placeholder="Min" min="0" oninput="renderProducts()">
+        <span style="color:var(--muted)">—</span>
+        <input type="number" class="price-input" id="price-max" placeholder="Max" min="0" oninput="renderProducts()">
+      </div>
+    </div>
+    <div class="filter-section">
+      <div class="filter-title">Stock</div>
+      <div class="filter-opt" id="fo-stock" onclick="toggleStockFilter()">Solo disponibles</div>
+    </div>
+    <button class="clear-filters" onclick="clearFilters()">✕ Limpiar filtros</button>
+  </aside>
+
+  <!-- PRODUCTS -->
+  <div>
+    <div class="products-header">
+      <div class="products-count" id="products-count">Cargando...</div>
+      <select class="sort-select" id="sort-sel" onchange="renderProducts()">
+        <option value="nombre">Nombre A-Z</option>
+        <option value="precio-asc">Precio: menor a mayor</option>
+        <option value="precio-desc">Precio: mayor a menor</option>
+        <option value="reciente">Más reciente</option>
+      </select>
+    </div>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+</div>
+
+<!-- CONTACTO -->
+<div id="contacto" style="background:var(--dark);color:#fff;padding:40px 20px;text-align:center;margin-top:40px">
+  <div style="max-width:600px;margin:0 auto">
+    <div style="font-family:var(--font-display);font-size:32px;font-weight:800;margin-bottom:8px">¿Necesitas ayuda?</div>
+    <p style="color:#aaa;font-size:15px;margin-bottom:24px">Escríbenos por WhatsApp y te asesoramos sobre el repuesto que necesitas para tu moto.</p>
+    <a class="wa-confirm-btn" id="wa-contact-link" href="#" target="_blank" style="display:inline-flex">
+      💬 Contactar por WhatsApp
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer" id="footer">
+  <strong>DG Motors</strong> · Repuestos para motos · Venezuela<br>
+  <span style="font-size:12px">Precios en USD · Tasa BCV actualizada · Envíos nacionales</span>
+</footer>
+
+<!-- CART DRAWER -->
+<div class="cart-overlay" id="cart-overlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cart-drawer" style="display:none">
+  <div class="cart-header">
+    <div class="cart-title">🛒 Tu carrito</div>
+    <button class="cart-close" onclick="closeCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cart-items-list"></div>
+  <div class="cart-footer" id="cart-footer"></div>
+</div>
+
+<!-- PRODUCT DETAIL MODAL -->
+<div class="modal-backdrop" id="pd-modal" onclick="closePD(event)">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <div class="modal-title" id="pd-title">—</div>
+      <button class="modal-close" onclick="closeModal('pd-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="pd-body"></div>
+    <div class="modal-footer" id="pd-footer"></div>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-backdrop" id="checkout-modal" onclick="closeCO(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="co-step-title">Finalizar pedido</div>
+      <button class="modal-close" onclick="closeModal('checkout-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="co-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────
+let products = JSON.parse(localStorage.getItem('dg_products') || '[]');
+const tasaBCV = parseFloat(localStorage.getItem('dg_tasa') || '560');
+let cart = JSON.parse(localStorage.getItem('dg_cart') || '[]');
+
+// Seed products
+if (products.length === 0) {
+  products = [
+    {id:1,nombre:'Carburador PE24 completo',sku:'DGM-001',categoria:'Motor',tipo:'Original',marcaRep:'Mikuni',marcaMoto:'Honda',modelo:'Wave · Fan · XR',cilindraje:'125cc',descripcion:'Carburador original japonés, incluye jets y flotador. Compatible con Honda Wave y Fan 125cc 2015-2024.',precio:28.50,stock:12,stockMin:3,descuento:0,peso:0.38,largo:12,ancho:8,alto:9,publicado:true},
+    {id:2,nombre:'Kit de pistón 50mm std',sku:'DGM-002',categoria:'Motor',tipo:'Alternativo',marcaRep:'Top1',marcaMoto:'Yamaha',modelo:'Crux · Crypton',cilindraje:'110cc',descripcion:'Kit completo: pistón, anillos, pines y clips. Para Yamaha Crux y Crypton 110cc.',precio:14.00,stock:2,stockMin:3,descuento:10,peso:0.52,largo:8,ancho:8,alto:6,publicado:true},
+    {id:3,nombre:'Bobina de encendido CDI',sku:'DGM-003',categoria:'Eléctrico',tipo:'Alternativo',marcaRep:'Daikin',marcaMoto:'Múltiples marcas',modelo:'Universal 125cc',cilindraje:'125cc',descripcion:'CDI universal compatible con la mayoría de motos 125cc chinas y japonesas.',precio:8.00,stock:0,stockMin:2,descuento:0,peso:0.15,largo:7,ancho:4,alto:3,publicado:true},
+    {id:4,nombre:'Pastillas de freno delanteras',sku:'DGM-004',categoria:'Frenos',tipo:'Original',marcaRep:'Brembo',marcaMoto:'Honda',modelo:'CBF150 · CB190',cilindraje:'150cc',descripcion:'Par de pastillas de freno disco delantero originales Brembo.',precio:11.00,stock:8,stockMin:4,descuento:0,peso:0.21,largo:9,ancho:5,alto:2,publicado:true},
+    {id:5,nombre:'Amortiguador trasero YSS',sku:'DGM-005',categoria:'Suspensión',tipo:'Alternativo',marcaRep:'YSS',marcaMoto:'Yamaha',modelo:'Fazer · Ys250',cilindraje:'250cc',descripcion:'Amortiguador trasero ajustable con 5 posiciones de dureza. Mejora notablemente el confort y el agarre.',precio:45.00,stock:3,stockMin:2,descuento:5,peso:1.20,largo:32,ancho:6,alto:6,publicado:true},
+    {id:6,nombre:'Relay de arranque 12V 80A',sku:'DGM-006',categoria:'Eléctrico',tipo:'Genérico',marcaRep:'',marcaMoto:'Múltiples marcas',modelo:'Universal',cilindraje:'Todos',descripcion:'Relay de arranque universal 12V 80A para motos.',precio:3.50,stock:20,stockMin:5,descuento:0,peso:0.08,largo:5,ancho:4,alto:3,publicado:true},
+    {id:7,nombre:'Plato de embrague Daytona',sku:'DGM-007',categoria:'Transmisión',tipo:'Original',marcaRep:'Daytona',marcaMoto:'Daytona',modelo:'DTN200 · DTN250',cilindraje:'200cc',descripcion:'Plato de embrague original Daytona, incluye discos y resortes de presión.',precio:22.00,stock:5,stockMin:2,descuento:0,peso:0.65,largo:15,ancho:15,alto:4,publicado:true},
+  ];
+  localStorage.setItem('dg_products', JSON.stringify(products));
+}
+
+// Only show published products
+const pub = products.filter(p => p.publicado !== false);
+
+// ── FILTERS STATE ─────────────────────────────────────
+let activeCat   = '';
+let activeMarca = '';
+let activeTipo  = '';
+let stockOnly   = false;
+let searchQ     = '';
+
+// ── INIT FILTERS ──────────────────────────────────────
+function buildFilters() {
+  const cats   = [...new Set(pub.map(p=>p.categoria).filter(Boolean))].sort();
+  const marcas = [...new Set(pub.map(p=>p.marcaMoto).filter(Boolean))].sort();
+  const tipos  = [...new Set(pub.map(p=>p.tipo).filter(Boolean))].sort();
+
+  document.getElementById('cat-filters').innerHTML =
+    renderFO('todas las categorías','',activeCat,'',cats) +
+    cats.map(c => renderFO(c,c,activeCat,'cat',pub.filter(p=>p.categoria===c).length)).join('');
+
+  document.getElementById('marca-filters').innerHTML =
+    renderFO('todas las marcas','',activeMarca,'',marcas) +
+    marcas.map(m => renderFO(m,m,activeMarca,'marca',pub.filter(p=>p.marcaMoto===m).length)).join('');
+
+  document.getElementById('tipo-filters').innerHTML =
+    renderFO('todos los tipos','',activeTipo,'',tipos) +
+    tipos.map(t => renderFO(t,t,activeTipo,'tipo',pub.filter(p=>p.tipo===t).length)).join('');
+
+  document.getElementById('hero-num-prod').textContent = pub.length;
+}
+
+function renderFO(label, val, active, type, count) {
+  if (label === '' || label.startsWith('todas') || label.startsWith('todos')) {
+    const isActive = active === '';
+    return `<div class="filter-opt ${isActive?'active':''}" onclick="setFilter('${type}','')">
+      ${label||'Todos'} <span class="fo-count">${typeof count==='number'?count:pub.length}</span></div>`;
+  }
+  const isActive = active === val;
+  const onclick = type==='cat'?`setFilter('cat','${val}')`
+    :type==='marca'?`setFilter('marca','${val}')`
+    :`setFilter('tipo','${val}')`;
+  return `<div class="filter-opt ${isActive?'active':''}" onclick="${onclick}">${label} <span class="fo-count">${count}</span></div>`;
+}
+
+function setFilter(type, val) {
+  if(type==='cat') activeCat = val;
+  else if(type==='marca') activeMarca = val;
+  else if(type==='tipo') activeTipo = val;
+  buildFilters();
+  renderProducts();
+}
+
+function toggleStockFilter() {
+  stockOnly = !stockOnly;
+  document.getElementById('fo-stock').classList.toggle('active', stockOnly);
+  renderProducts();
+}
+
+function filterHero(cat, el) {
+  activeCat = cat;
+  document.querySelectorAll('.hero-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  buildFilters();
+  renderProducts();
+  document.getElementById('catalogo').scrollIntoView({behavior:'smooth'});
+}
+
+function clearFilters() {
+  activeCat=''; activeMarca=''; activeTipo=''; stockOnly=false; searchQ='';
+  document.getElementById('header-search').value='';
+  document.getElementById('price-min').value='';
+  document.getElementById('price-max').value='';
+  document.getElementById('fo-stock').classList.remove('active');
+  document.querySelectorAll('.hero-chip').forEach((c,i)=>c.classList.toggle('active',i===0));
+  buildFilters();
+  renderProducts();
+}
+
+function onSearch() {
+  searchQ = document.getElementById('header-search').value.toLowerCase();
+  renderProducts();
+}
+
+function scrollToSection() {
+  document.getElementById('catalogo').scrollIntoView({behavior:'smooth'});
+}
+
+// ── PRODUCT LIST ──────────────────────────────────────
+function getFiltered() {
+  let list = [...pub];
+  if (searchQ) list = list.filter(p =>
+    p.nombre.toLowerCase().includes(searchQ) ||
+    (p.sku||'').toLowerCase().includes(searchQ) ||
+    (p.marcaMoto||'').toLowerCase().includes(searchQ) ||
+    (p.modelo||'').toLowerCase().includes(searchQ) ||
+    (p.categoria||'').toLowerCase().includes(searchQ)
+  );
+  if (activeCat)   list = list.filter(p => p.categoria===activeCat);
+  if (activeMarca) list = list.filter(p => p.marcaMoto===activeMarca);
+  if (activeTipo)  list = list.filter(p => p.tipo===activeTipo);
+  if (stockOnly)   list = list.filter(p => p.stock > 0);
+  const minP = parseFloat(document.getElementById('price-min')?.value)||0;
+  const maxP = parseFloat(document.getElementById('price-max')?.value)||Infinity;
+  if(minP>0) list = list.filter(p=>p.precio>=minP);
+  if(maxP<Infinity) list = list.filter(p=>p.precio<=maxP);
+  const sort = document.getElementById('sort-sel')?.value||'nombre';
+  if(sort==='nombre') list.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  else if(sort==='precio-asc') list.sort((a,b)=>a.precio-b.precio);
+  else if(sort==='precio-desc') list.sort((a,b)=>b.precio-a.precio);
+  else list.sort((a,b)=>b.id-a.id);
+  return list;
+}
+
+const catEmoji = {Motor:'🔧',Eléctrico:'⚡',Frenos:'🛑',Suspensión:'🔩',Transmisión:'⚙️',Carrocería:'🏍️',Lubricantes:'🛢️',Accesorios:'🎽'};
+
+function renderProducts() {
+  const list = getFiltered();
+  const grid = document.getElementById('products-grid');
+  document.getElementById('products-count').innerHTML = `<strong>${list.length}</strong> productos encontrados`;
+
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty-state"><div class="ei">🔍</div><p>No encontramos repuestos con esos filtros.<br><button onclick="clearFilters()" style="color:var(--red);background:none;border:none;cursor:pointer;font-size:14px;margin-top:8px">Limpiar filtros</button></p></div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p => {
+    const isOut = p.stock === 0;
+    const finalPrecio = p.descuento>0 ? (p.precio*(1-p.descuento/100)).toFixed(2) : p.precio.toFixed(2);
+    const bs = (parseFloat(finalPrecio)*tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0});
+    const emoji = catEmoji[p.categoria]||'🔧';
+    const inCart = cart.find(c=>c.id===p.id);
+    return `<div class="product-card ${isOut?'out-of-stock':''}" onclick="openProductDetail(${p.id})">
+      <div class="pc-img">
+        ${emoji}
+        ${p.tipo==='Original'?'<span class="pc-badge badge-original">Original</span>':''}
+        ${p.descuento>0?`<span class="pc-badge badge-descuento">-${p.descuento}%</span>`:''}
+        ${isOut?'<span class="pc-badge badge-agotado" style="left:auto;right:8px">Agotado</span>':''}
+      </div>
+      <div class="pc-body">
+        <div class="pc-cat">${p.categoria}</div>
+        <div class="pc-name">${p.nombre}</div>
+        <div class="pc-compat">${p.marcaMoto||''} ${p.modelo?'· '+p.modelo:''}</div>
+        <div class="pc-price">
+          <span class="pc-usd">$${finalPrecio}</span>
+          ${p.descuento>0?`<span class="pc-old">$${p.precio.toFixed(2)}</span>`:''}
+        </div>
+        <span class="pc-bs">${bs} Bs</span>
+      </div>
+      <div class="pc-foot" onclick="event.stopPropagation()">
+        <button class="add-cart-btn" onclick="addToCart(${p.id})" ${isOut?'disabled':''}>
+          ${isOut?'Agotado': inCart?'+ Agregar':'🛒 Agregar'}
+        </button>
+        <button class="detail-btn" onclick="openProductDetail(${p.id})">Ver</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── PRODUCT DETAIL ────────────────────────────────────
+function openProductDetail(id) {
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  const isOut = p.stock===0;
+  const finalPrecio = p.descuento>0?(p.precio*(1-p.descuento/100)).toFixed(2):p.precio.toFixed(2);
+  const bs = (parseFloat(finalPrecio)*tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0});
+  const emoji = catEmoji[p.categoria]||'🔧';
+  document.getElementById('pd-title').textContent = p.nombre;
+  document.getElementById('pd-body').innerHTML = `
+    <div class="pd-img">${emoji}</div>
+    <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+      <span style="font-family:var(--font-display);font-size:32px;font-weight:700">$${finalPrecio}</span>
+      ${p.descuento>0?`<span style="font-size:16px;color:var(--muted);text-decoration:line-through">$${p.precio.toFixed(2)}</span><span style="background:var(--red);color:#fff;font-size:12px;font-weight:700;padding:2px 8px;border-radius:3px">-${p.descuento}%</span>`:''}
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:14px">${bs} Bs · Tasa BCV ${tasaBCV}</div>
+    <p style="font-size:14px;color:#444;line-height:1.6;margin-bottom:14px">${p.descripcion||'Sin descripción.'}</p>
+    <div class="pd-specs">
+      <div class="pd-spec"><div class="pd-spec-key">Categoría</div><div class="pd-spec-val">${p.categoria}</div></div>
+      <div class="pd-spec"><div class="pd-spec-key">Tipo</div><div class="pd-spec-val">${p.tipo||'—'}</div></div>
+      <div class="pd-spec"><div class="pd-spec-key">Compatible con</div><div class="pd-spec-val">${p.marcaMoto||'—'}</div></div>
+      <div class="pd-spec"><div class="pd-spec-key">Modelo</div><div class="pd-spec-val">${p.modelo||'—'}</div></div>
+      ${p.cilindraje?`<div class="pd-spec"><div class="pd-spec-key">Cilindraje</div><div class="pd-spec-val">${p.cilindraje}</div></div>`:''}
+      ${p.oem?`<div class="pd-spec"><div class="pd-spec-key">Número OEM</div><div class="pd-spec-val" style="font-family:monospace;font-size:12px">${p.oem}</div></div>`:''}
+      ${p.peso?`<div class="pd-spec"><div class="pd-spec-key">Peso</div><div class="pd-spec-val">${p.peso} kg</div></div>`:''}
+      ${p.largo?`<div class="pd-spec"><div class="pd-spec-key">Dimensiones</div><div class="pd-spec-val">${p.largo}×${p.ancho}×${p.alto} cm</div></div>`:''}
+      <div class="pd-spec"><div class="pd-spec-key">Disponibilidad</div><div class="pd-spec-val" style="color:${isOut?'#E74C3C':p.stock<=3?'#B45309':'var(--green)'">${isOut?'Agotado':p.stock<=3?'Últimas unidades ('+p.stock+')':'En stock'}</div></div>
+      <div class="pd-spec"><div class="pd-spec-key">SKU</div><div class="pd-spec-val" style="font-family:monospace;font-size:12px">${p.sku||'—'}</div></div>
+    </div>`;
+  document.getElementById('pd-footer').innerHTML = `
+    <a href="https://wa.me/${localStorage.getItem('dg_wa_number')||'584140000000'}?text=Hola%20DG%20Motors%2C%20me%20interesa%20el%20repuesto%20${encodeURIComponent(p.nombre)}%20(${p.sku})" target="_blank" class="wa-confirm-btn" style="font-size:13px;padding:9px 16px">💬 Consultar por WA</a>
+    <div style="display:flex;gap:8px">
+      <button class="add-cart-btn" style="padding:9px 20px;border-radius:4px;font-size:13px" onclick="addToCart(${p.id});closeModal('pd-modal')" ${isOut?'disabled':''}>
+        ${isOut?'Agotado':'🛒 Agregar al carrito'}
+      </button>
+    </div>`;
+  document.getElementById('pd-modal').classList.add('open');
+}
+
+function closePD(e) { if(e.target===document.getElementById('pd-modal')) closeModal('pd-modal'); }
+
+// ── CART ──────────────────────────────────────────────
+function saveCart() { localStorage.setItem('dg_cart', JSON.stringify(cart)); }
+
+function addToCart(id) {
+  const p = products.find(x=>x.id===id);
+  if(!p || p.stock===0) return;
+  const existing = cart.find(c=>c.id===id);
+  if(existing) {
+    if(existing.qty >= p.stock) { showToast('Sin más stock disponible'); return; }
+    existing.qty++;
+  } else {
+    cart.push({id:p.id,nombre:p.nombre,sku:p.sku||'',precio:p.descuento>0?p.precio*(1-p.descuento/100):p.precio,qty:1,emoji:catEmoji[p.categoria]||'🔧'});
+  }
+  saveCart();
+  updateCartCount();
+  renderProducts();
+  showToast('✓ ' + p.nombre.slice(0,30) + ' agregado');
+}
+
+function updateCartCount() {
+  const total = cart.reduce((s,c)=>s+c.qty,0);
+  document.getElementById('cart-count').textContent = total;
+}
+
+function openCart() {
+  document.getElementById('cart-overlay').classList.add('open');
+  document.getElementById('cart-drawer').style.display='flex';
+  document.getElementById('cart-drawer').style.flexDirection='column';
+  renderCart();
+}
+
+function closeCart() {
+  document.getElementById('cart-overlay').classList.remove('open');
+  document.getElementById('cart-drawer').style.display='none';
+}
+
+function renderCart() {
+  const list = document.getElementById('cart-items-list');
+  const footer = document.getElementById('cart-footer');
+  if (!cart.length) {
+    list.innerHTML = '<div class="cart-empty"><div style="font-size:48px;margin-bottom:12px">🛒</div><p>Tu carrito está vacío.<br>Agrega repuestos del catálogo.</p></div>';
+    footer.innerHTML = '';
+    return;
+  }
+  list.innerHTML = cart.map((c,i) => {
+    const bs = (c.precio*c.qty*tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0});
+    return `<div class="cart-item">
+      <div class="ci-icon">${c.emoji}</div>
+      <div style="flex:1;min-width:0">
+        <div class="ci-name">${c.nombre}</div>
+        <div class="ci-sku">${c.sku}</div>
+        <div style="font-size:11px;color:var(--muted)">${bs} Bs</div>
+        <div class="ci-controls">
+          <button class="qty-btn" onclick="cartQty(${i},-1)">−</button>
+          <span class="qty-val">${c.qty}</span>
+          <button class="qty-btn" onclick="cartQty(${i},1)">+</button>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end">
+        <button class="ci-remove" onclick="removeFromCart(${i})">✕</button>
+        <div class="ci-price">$${(c.precio*c.qty).toFixed(2)}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const sub = cart.reduce((s,c)=>s+c.precio*c.qty,0);
+  const bs = (sub*tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0});
+  footer.innerHTML = `
+    <div class="cart-total-row"><span style="color:var(--muted)">Subtotal</span><span>$${sub.toFixed(2)}</span></div>
+    <div class="cart-total-row" style="border-bottom:none;margin-bottom:0">
+      <span style="font-weight:700">Total</span>
+      <div style="text-align:right">
+        <div class="cart-total-final">$${sub.toFixed(2)}</div>
+        <div class="cart-total-bs">${bs} Bs</div>
+      </div>
+    </div>
+    <button class="checkout-btn" onclick="closeCart();openCheckout()">Finalizar pedido →</button>`;
+}
+
+function cartQty(i, delta) {
+  cart[i].qty = Math.max(1, cart[i].qty + delta);
+  saveCart(); updateCartCount(); renderCart();
+}
+function removeFromCart(i) {
+  cart.splice(i,1);
+  saveCart(); updateCartCount(); renderCart(); renderProducts();
+}
+
+// ── CHECKOUT ──────────────────────────────────────────
+let selectedPago = 'pago_movil';
+
+function openCheckout() {
+  if(!cart.length) { showToast('Tu carrito está vacío'); return; }
+  selectedPago = 'pago_movil';
+  const sub = cart.reduce((s,c)=>s+c.precio*c.qty,0);
+  const bs = (sub*tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0});
+  document.getElementById('co-step-title').textContent = 'Finalizar pedido';
+  document.getElementById('co-body').innerHTML = `
+    <div class="order-summary">
+      ${cart.map(c=>`<div class="os-item"><span>${c.qty}× ${c.nombre.length>30?c.nombre.slice(0,28)+'…':c.nombre}</span><span>$${(c.precio*c.qty).toFixed(2)}</span></div>`).join('')}
+      <div class="os-item">
+        <span>TOTAL</span>
+        <div style="text-align:right">
+          <div style="font-family:var(--font-display);font-size:20px;font-weight:700">$${sub.toFixed(2)}</div>
+          <div style="font-size:11px;color:var(--muted)">${bs} Bs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">Tus datos</div>
+    <div class="form-group">
+      <label class="form-label">Nombre completo *</label>
+      <input class="form-input" id="co-nombre" placeholder="Nombre y apellido">
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Teléfono / WhatsApp *</label>
+        <input class="form-input" id="co-telefono" placeholder="0414-0000000">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ciudad / Estado *</label>
+        <input class="form-input" id="co-ciudad" placeholder="Caracas...">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dirección de entrega</label>
+      <input class="form-input" id="co-direccion" placeholder="Dirección completa (si es a domicilio)">
+    </div>
+
+    <div class="form-section">Método de pago</div>
+    <div class="pago-grid">
+      <div class="pago-opt selected" data-m="pago_movil" onclick="selPago(this)"><div class="po-title">📱 Pago Móvil</div><div class="po-sub">En bolívares · Tasa BCV</div></div>
+      <div class="pago-opt" data-m="zelle" onclick="selPago(this)"><div class="po-title">💵 Zelle USD</div><div class="po-sub">Transferencia USA</div></div>
+      <div class="pago-opt" data-m="usdt" onclick="selPago(this)"><div class="po-title">₿ USDT / Cripto</div><div class="po-sub">Binance · TRC20</div></div>
+      <div class="pago-opt" data-m="transferencia" onclick="selPago(this)"><div class="po-title">🏦 Transferencia Bs</div><div class="po-sub">Banco venezolano</div></div>
+      <div class="pago-opt" data-m="efectivo" onclick="selPago(this)"><div class="po-title">💴 Efectivo USD</div><div class="po-sub">Pago presencial</div></div>
+      <div class="pago-opt" data-m="efectivo_bs" onclick="selPago(this)"><div class="po-title">💵 Efectivo Bs</div><div class="po-sub">Pago presencial</div></div>
+    </div>
+
+    <div class="form-section">Despacho</div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Tipo de entrega</label>
+        <select class="form-input" id="co-despacho">
+          <option value="encomienda">Encomienda (MRW/Zoom/Domesa)</option>
+          <option value="domicilio">A domicilio</option>
+          <option value="retiro">Retiro en tienda</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nota adicional</label>
+        <input class="form-input" id="co-nota" placeholder="Instrucciones especiales...">
+      </div>
+    </div>
+
+    <button class="checkout-btn" onclick="submitOrder()" style="margin-top:8px">Enviar pedido →</button>`;
+  document.getElementById('checkout-modal').classList.add('open');
+}
+
+function selPago(el) {
+  selectedPago = el.dataset.m;
+  document.querySelectorAll('.pago-opt').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function submitOrder() {
+  const nombre   = document.getElementById('co-nombre').value.trim();
+  const telefono = document.getElementById('co-telefono').value.trim();
+  const ciudad   = document.getElementById('co-ciudad').value.trim();
+  if(!nombre)   { showToast('Ingresa tu nombre'); return; }
+  if(!telefono) { showToast('Ingresa tu teléfono'); return; }
+  if(!ciudad)   { showToast('Ingresa tu ciudad'); return; }
+
+  const sub = cart.reduce((s,c)=>s+c.precio*c.qty,0);
+  const order = {
+    id: 'DGM-' + new Date().getFullYear() + '-' + String(Date.now()).slice(-4),
+    cliente: {
+      nombre, telefono, ciudad,
+      direccion: document.getElementById('co-direccion').value.trim(),
+    },
+    items: cart.map(c=>({productoId:c.id,nombre:c.nombre,sku:c.sku,qty:c.qty,precio:c.precio})),
+    subtotal: sub, envio: 0, descuento: 0, total: sub,
+    metodo: selectedPago,
+    pagoEstado: 'pendiente',
+    refPago: '',
+    despacho: document.getElementById('co-despacho').value,
+    transportista: '',
+    estado: 'pendiente',
+    nota: document.getElementById('co-nota').value.trim(),
+    fecha: new Date().toISOString(),
+  };
+
+  // Save order
+  const orders = JSON.parse(localStorage.getItem('dg_orders')||'[]');
+  orders.unshift(order);
+  localStorage.setItem('dg_orders', JSON.stringify(orders));
+
+  // Auto-register client
+  const clients = JSON.parse(localStorage.getItem('dg_clients')||'[]');
+  if(!clients.find(c=>c.telefono===telefono)) {
+    clients.push({
+      id:'C-'+Date.now(),nombre,telefono,ciudad,
+      email:'',direccion:order.cliente.direccion||'',cedula:'',
+      metodo:selectedPago,marca:'',modelo:'',año:'',color:'',
+      segmento:'nuevo',tags:'',notas:'',
+      fechaCreacion:new Date().toISOString()
+    });
+    localStorage.setItem('dg_clients', JSON.stringify(clients));
+  }
+
+  // Clear cart
+  cart = [];
+  saveCart();
+  updateCartCount();
+  renderProducts();
+
+  // Show success
+  const bs = (sub*tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0});
+  const waMsg = buildConfirmWA(order);
+  document.getElementById('co-body').innerHTML = `
+    <div class="success-screen">
+      <div class="success-icon">✅</div>
+      <div class="success-title">¡Pedido recibido!</div>
+      <p class="success-sub">Tu pedido <strong>${order.id}</strong> fue registrado exitosamente.<br>
+      Total: <strong>$${sub.toFixed(2)} USD</strong> · ${bs} Bs<br>
+      Nos contactaremos por WhatsApp para confirmar el pago y el despacho.</p>
+      <a class="wa-confirm-btn" href="${waMsg}" target="_blank">
+        💬 Confirmar por WhatsApp
+      </a>
+      <div style="margin-top:16px">
+        <button onclick="closeModal('checkout-modal')" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer">Seguir comprando</button>
+      </div>
+    </div>`;
+  document.getElementById('co-step-title').textContent = '¡Pedido confirmado!';
+}
+
+function buildConfirmWA(o) {
+  const metodos = {pago_movil:'Pago Móvil',zelle:'Zelle',usdt:'USDT/Cripto',transferencia:'Transferencia Bs',efectivo:'Efectivo USD',efectivo_bs:'Efectivo Bs'};
+  const bs = (o.total*tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0});
+  const prods = o.items.map(i=>`  • ${i.qty}× ${i.nombre} — $${(i.qty*i.precio).toFixed(2)}`).join('\n');
+  const msg = `🔧 *DG Motors* — Pedido ${o.id}
+
+Hola, acabo de realizar un pedido:
+
+*Productos:*
+${prods}
+
+💵 *Total: $${o.total.toFixed(2)} USD* (${bs} Bs)
+💳 *Método de pago:* ${metodos[o.metodo]||o.metodo}
+🚚 *Despacho:* ${o.despacho}
+📍 *Ciudad:* ${o.cliente.ciudad}
+
+Por favor confirmen disponibilidad y datos de pago. ¡Gracias!`;
+  return `https://wa.me/${localStorage.getItem('dg_wa_number')||'584140000000'}?text=${encodeURIComponent(msg)}`;
+}
+
+function closeCO(e) { if(e.target===document.getElementById('checkout-modal')) closeModal('checkout-modal'); }
+
+// ── UTILS ─────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
+}
+
+// ── INIT ──────────────────────────────────────────────
+buildFilters();
+renderProducts();
+updateCartCount();
+(function applyWANumber() {
+  const n = localStorage.getItem('dg_wa_number') || '584140000000';
+  const el = document.getElementById('wa-contact-link');
+  if (el) el.href = 'https://wa.me/' + n + '?text=Hola%20DG%20Motors%2C%20necesito%20información%20sobre%20repuestos';
+})();
+</script>
+</body>
+</html>

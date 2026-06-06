@@ -1,0 +1,3254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DG Motors — Panel Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red:#D42B2B; --red-dark:#A01E1E; --red-light:#2A0D0D;
+    --charcoal:#1A1A1A; --dark:#111111; --muted:#888;
+    --border:#2E2E2E; --surface:#1E1E1E; --surface2:#252525;
+    --white:#F5F5F0; --green:#2ECC71; --amber:#F39C12;
+    --blue:#3B8BD5; --font:'Barlow',sans-serif;
+    --font-display:'Barlow Condensed',sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);background:var(--dark);color:var(--white);min-height:100vh}
+
+  /* ── LOGIN SCREEN ─────────────────────────────────── */
+  #login-screen {
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; background:var(--dark);
+    padding:20px;
+  }
+  .login-box {
+    background:var(--charcoal); border:1px solid var(--border);
+    border-radius:10px; width:100%; max-width:400px;
+    padding:40px 36px; animation:slideUp .25s;
+  }
+  @keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .login-logo {
+    font-family:var(--font-display); font-size:32px; font-weight:700;
+    letter-spacing:3px; text-align:center; margin-bottom:6px;
+  }
+  .login-logo span{color:var(--red)}
+  .login-sub {
+    text-align:center; font-size:12px; color:var(--muted);
+    text-transform:uppercase; letter-spacing:1.5px; margin-bottom:32px;
+  }
+  .login-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  .login-label{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  .login-input {
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:4px; padding:10px 14px; color:var(--white);
+    font-family:var(--font); font-size:14px; outline:none;
+    transition:border .15s; width:100%;
+  }
+  .login-input:focus{border-color:var(--red)}
+  .login-input::placeholder{color:var(--muted)}
+  .login-btn {
+    width:100%; padding:12px; background:var(--red); color:#fff;
+    border:none; border-radius:4px; font-family:var(--font);
+    font-size:14px; font-weight:700; cursor:pointer; letter-spacing:.5px;
+    text-transform:uppercase; transition:background .15s; margin-top:8px;
+  }
+  .login-btn:hover{background:var(--red-dark)}
+  .login-error {
+    display:none; background:#2A0D0D; border:1px solid #4A1A1A;
+    border-radius:4px; padding:10px 14px; font-size:13px;
+    color:#E74C3C; text-align:center; margin-top:12px;
+  }
+  .login-error.show{display:block}
+
+  /* ── TOPBAR ───────────────────────────────────────── */
+  .topbar {
+    background:var(--charcoal); border-bottom:2px solid var(--red);
+    padding:0 20px; display:flex; align-items:center; gap:16px;
+    height:56px; position:sticky; top:0; z-index:100;
+    flex-shrink:0;
+  }
+  .logo{font-family:var(--font-display);font-size:22px;font-weight:700;letter-spacing:2px}
+  .logo span{color:var(--red)}
+  .topbar-nav{display:flex;gap:2px;flex:1}
+  .nav-tab {
+    padding:6px 14px; border-radius:4px; font-size:13px; font-weight:600;
+    cursor:pointer; color:var(--muted); border:none; background:none;
+    transition:all .15s; letter-spacing:.4px; text-transform:uppercase;
+  }
+  .nav-tab:hover{color:var(--white);background:var(--surface)}
+  .nav-tab.active{color:var(--white);background:var(--red)}
+
+  /* BCV widget */
+  .bcv-widget {
+    display:flex; align-items:center; gap:6px;
+    background:var(--surface); border:1px solid var(--border);
+    border-radius:4px; padding:4px 10px; font-size:12px;
+    white-space:nowrap;
+  }
+  .bcv-rate{color:var(--amber);font-weight:700;font-family:var(--font-display);font-size:14px}
+  .bcv-date{color:var(--muted);font-size:10px}
+  .bcv-refresh {
+    background:none; border:none; cursor:pointer; color:var(--muted);
+    font-size:14px; padding:2px; transition:color .15s; line-height:1;
+  }
+  .bcv-refresh:hover{color:var(--amber)}
+
+  /* Topbar actions (right side) */
+  .topbar-right{display:flex;align-items:center;gap:8px}
+  .btn {
+    padding:7px 16px; border-radius:4px; font-family:var(--font);
+    font-size:12px; font-weight:700; cursor:pointer; border:none;
+    transition:all .15s; letter-spacing:.4px; text-transform:uppercase;
+    display:inline-flex; align-items:center; gap:5px;
+  }
+  .btn-primary{background:var(--red);color:#fff}
+  .btn-primary:hover{background:var(--red-dark)}
+  .btn-secondary{background:var(--surface2);color:var(--white);border:1px solid var(--border)}
+  .btn-secondary:hover{border-color:var(--red);color:var(--red)}
+  .btn-ghost{background:none;color:var(--muted);border:1px solid var(--border)}
+  .btn-ghost:hover{color:var(--white);border-color:#555}
+  .btn-success{background:#0D3B1E;color:var(--green);border:1px solid #1A5C2E}
+  .btn-success:hover{background:#1A5C2E}
+  .btn-warn{background:#2A1A00;color:var(--amber);border:1px solid #4A3000}
+  .btn-warn:hover{background:#4A3000}
+  .btn-danger{background:none;color:#E74C3C;border:1px solid #4A1A1A}
+  .btn-danger:hover{background:#2A0D0D}
+  .btn-sm{padding:5px 12px;font-size:12px}
+  .btn-xs{padding:3px 9px;font-size:11px}
+  .btn-wa{background:#075e54;color:#fff}
+  .btn-wa:hover{background:#128c7e}
+
+  /* ── LAYOUT ────────────────────────────────────────── */
+  #admin-app{display:none;flex-direction:column;height:100vh}
+
+  .admin-section{display:none;height:calc(100vh - 56px);overflow:hidden}
+  .admin-section.active{display:flex;flex-direction:column}
+
+  .layout{display:flex;height:100%;overflow:hidden}
+
+  .sidebar {
+    width:220px; background:var(--charcoal); border-right:1px solid var(--border);
+    padding:16px 0; overflow-y:auto; flex-shrink:0;
+  }
+  .sidebar-section{padding:0 16px;margin-bottom:20px}
+  .sidebar-label {
+    font-size:10px; font-weight:700; letter-spacing:1.5px;
+    color:var(--muted); text-transform:uppercase; margin-bottom:8px;
+  }
+  .sidebar-item {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:7px 10px; border-radius:4px; cursor:pointer; font-size:13px;
+    color:var(--white); transition:background .12s; user-select:none;
+  }
+  .sidebar-item:hover{background:var(--surface)}
+  .sidebar-item.active{background:#2A0D0D;color:var(--red);font-weight:600}
+  .sidebar-badge {
+    font-size:10px; font-weight:700; background:var(--surface2);
+    color:var(--muted); padding:1px 7px; border-radius:10px;
+  }
+  .sidebar-item.active .sidebar-badge{background:var(--red-dark);color:#fff}
+
+  .main{flex:1;overflow-y:auto;padding:24px;background:var(--dark)}
+
+  /* ── STATS ─────────────────────────────────────────── */
+  .stats-row{display:grid;gap:12px;margin-bottom:20px}
+  .stats-4{grid-template-columns:repeat(4,1fr)}
+  .stats-5{grid-template-columns:repeat(5,1fr)}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:14px 16px}
+  .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px}
+  .stat-value{font-family:var(--font-display);font-size:28px;font-weight:700;line-height:1}
+  .sv-white{color:var(--white)} .sv-green{color:var(--green)}
+  .sv-amber{color:var(--amber)} .sv-red{color:#E74C3C} .sv-blue{color:var(--blue)}
+
+  /* ── TABLE ─────────────────────────────────────────── */
+  .table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-bottom:24px}
+  table{width:100%;border-collapse:collapse}
+  thead th{background:var(--charcoal);padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);text-align:left;border-bottom:1px solid var(--border);white-space:nowrap}
+  tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+  tbody tr:last-child{border-bottom:none}
+  tbody tr:hover{background:var(--surface2)}
+  tbody td{padding:11px 14px;font-size:13px;vertical-align:middle}
+  .pagination{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+  .page-btns{display:flex;gap:4px}
+  .page-btn{width:28px;height:28px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--white);font-size:12px;cursor:pointer}
+  .page-btn.active{background:var(--red);border-color:var(--red)}
+
+  /* ── TOOLBAR ───────────────────────────────────────── */
+  .toolbar{display:flex;gap:10px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .search-box{flex:1;min-width:180px;position:relative}
+  .search-box input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:8px 12px 8px 34px;color:var(--white);font-family:var(--font);font-size:13px;outline:none;transition:border .15s}
+  .search-box input:focus{border-color:var(--red)}
+  .search-box input::placeholder{color:var(--muted)}
+  .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px}
+  .filter-select{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:8px 12px;color:var(--white);font-family:var(--font);font-size:13px;outline:none;cursor:pointer}
+
+  /* ── BADGES / STATUS ───────────────────────────────── */
+  .badge{display:inline-block;padding:2px 9px;border-radius:3px;font-size:11px;font-weight:700;text-transform:uppercase}
+  .badge-ok{background:#0D2B0D;color:var(--green)}
+  .badge-low{background:#2A200A;color:var(--amber)}
+  .badge-out{background:#2A0D0D;color:#E74C3C}
+  .status{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:3px;font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase}
+  .st-pendiente{background:#2A200A;color:var(--amber)}
+  .st-confirmado{background:#0D1A2A;color:var(--blue)}
+  .st-preparando{background:#1A0D2A;color:#A78BFA}
+  .st-despachado{background:#0D2020;color:#34D399}
+  .st-entregado{background:#0D2B0D;color:var(--green)}
+  .st-cancelado{background:#2A0D0D;color:#F87171}
+  .pago{display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700}
+  .pago-pagado{background:#0D2B0D;color:var(--green)}
+  .pago-pendiente{background:#2A200A;color:var(--amber)}
+  .pago-parcial{background:#0D1A2A;color:var(--blue)}
+
+  /* ── MODALS ────────────────────────────────────────── */
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:200;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto}
+  .modal-backdrop.open{display:flex;animation:fi .15s}
+  @keyframes fi{from{opacity:0}to{opacity:1}}
+  .modal{background:var(--charcoal);border:1px solid var(--border);border-radius:8px;width:100%;max-width:700px;animation:su .2s;margin:auto}
+  @keyframes su{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border)}
+  .modal-title{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+  .modal-close{background:none;border:none;color:var(--muted);font-size:20px;cursor:pointer}
+  .modal-close:hover{color:var(--white)}
+  .modal-body{padding:22px}
+  .modal-footer{padding:14px 22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+
+  /* ── FORMS ─────────────────────────────────────────── */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-group{display:flex;flex-direction:column;gap:6px}
+  .form-group.full{grid-column:1/-1}
+  .form-label{font-size:11px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase}
+  .form-input{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:9px 12px;color:var(--white);font-family:var(--font);font-size:14px;outline:none;transition:border .15s;width:100%}
+  .form-input:focus{border-color:var(--red)}
+  .form-input::placeholder{color:var(--muted)}
+  select.form-input{cursor:pointer}
+  textarea.form-input{resize:vertical;min-height:70px}
+  .form-hint{font-size:11px;color:var(--muted)}
+  .form-section{font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);border-bottom:1px solid var(--border);padding-bottom:6px;margin:18px 0 12px}
+
+  /* ── TOAST ─────────────────────────────────────────── */
+  .toast{position:fixed;bottom:24px;right:24px;padding:12px 20px;border-radius:6px;font-size:14px;font-weight:600;z-index:999;display:none;animation:su .2s}
+  .toast.show{display:block}
+  .toast.success{background:var(--surface2);border:1px solid var(--green);color:var(--green)}
+  .toast.warn{background:var(--surface2);border:1px solid var(--amber);color:var(--amber)}
+  .toast.err{background:var(--surface2);border:1px solid #E74C3C;color:#E74C3C}
+
+  /* ── ALERT DOT ─────────────────────────────────────── */
+  .alert-dot{width:8px;height:8px;border-radius:50%;background:var(--amber);display:inline-block;margin-right:4px;animation:pulse 1.5s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+  /* ── CONFIG SECTION ────────────────────────────────── */
+  .config-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:24px;margin-bottom:20px}
+  .config-card-title{font-family:var(--font-display);font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:18px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+
+  /* ── BCV MODAL ─────────────────────────────────────── */
+  .bcv-modal{max-width:480px}
+
+  /* ── EMPTY ─────────────────────────────────────────── */
+  .empty{text-align:center;padding:60px 20px;color:var(--muted)}
+  .empty-ico{font-size:48px;margin-bottom:12px}
+
+  /* ── CATÁLOGO: extras ──────────────────────────────── */
+  .bcv-bar{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:4px;padding:8px 14px;font-size:12px;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+  .bcv-bar strong{color:var(--amber)}
+  .upload-zone{border:2px dashed var(--border);border-radius:6px;padding:22px;text-align:center;cursor:pointer;transition:border .15s;background:var(--surface)}
+  .upload-zone:hover{border-color:var(--red)}
+  .upload-zone strong{font-size:14px;color:var(--white)}
+  .medidas-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px}
+  .cat-badge-motor{background:#1A2A3A;color:#5B9BD5}
+  .cat-badge-electrico{background:#1A2A1A;color:#5BD57A}
+  .cat-badge-transmision{background:#2A1A2A;color:#D55BB5}
+  .cat-badge-frenos{background:#2A1A1A;color:#D5795B}
+  .cat-badge-suspension{background:#1A2A2A;color:#5BD5C4}
+  .cat-badge-carroceria{background:#2A2A1A;color:#D5C45B}
+
+  /* ── INVENTARIO: extras ─────────────────────────────── */
+  .stock-bar-wrap{width:80px;height:6px;background:var(--border);border-radius:3px;display:inline-block;vertical-align:middle;margin-left:8px}
+  .stock-bar{height:6px;border-radius:3px;transition:width .3s}
+  .bar-green{background:var(--green)} .bar-amber{background:var(--amber)} .bar-red{background:#E74C3C}
+  .qty-input{width:64px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--white);font-family:var(--font);font-size:13px;text-align:center;outline:none}
+  .qty-input:focus{border-color:var(--red)}
+  .history-row{display:flex;align-items:center;gap:12px;padding:9px 14px;border-radius:5px;background:var(--surface);border:1px solid var(--border);margin-bottom:6px;font-size:13px}
+  .history-type{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+  .type-entrada{background:#0D2B0D} .type-salida{background:#2A0D0D} .type-ajuste{background:#2A200A} .type-devolucion{background:#0D1A2A}
+  .history-prod{font-weight:600;color:var(--white);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .history-qty{font-family:var(--font-display);font-size:16px;font-weight:700;min-width:50px;text-align:right}
+  .qty-pos{color:var(--green)} .qty-neg{color:#E74C3C}
+  .history-meta{font-size:11px;color:var(--muted);min-width:120px;text-align:right}
+  .inv-alert-panel{background:var(--surface);border:1px solid #4A3000;border-left:3px solid var(--amber);border-radius:6px;padding:14px 16px;margin-bottom:20px}
+  .inv-alert-panel-title{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:10px}
+  .alert-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+  .alert-item:last-child{border-bottom:none}
+  .alert-name{color:var(--white);font-weight:600} .alert-detail{color:var(--muted);font-size:12px} .alert-action{display:flex;gap:6px}
+  .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
+  .report-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px}
+  .report-card-title{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .mini-bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;font-size:12px}
+  .mini-bar-label{width:110px;color:var(--white);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
+  .mini-bar-track{flex:1;height:5px;background:var(--border);border-radius:3px}
+  .mini-bar-fill{height:5px;border-radius:3px;background:var(--red);transition:width .4s}
+  .mini-bar-val{width:36px;text-align:right;color:var(--muted);font-size:11px}
+
+  /* ── PEDIDOS: sidebar status colors ──────────────────── */
+  .sidebar-item.s-todos.active{background:#1A1A2A;color:var(--blue)}
+  .sidebar-item.s-pendiente.active{background:#2A200A;color:var(--amber)}
+  .sidebar-item.s-confirmado.active{background:#0D1A2A;color:var(--blue)}
+  .sidebar-item.s-preparando.active{background:#1A0D2A;color:#A78BFA}
+  .sidebar-item.s-despachado.active{background:#0D2020;color:#34D399}
+  .sidebar-item.s-entregado.active{background:#0D2B0D;color:var(--green)}
+  .sidebar-item.s-cancelado.active{background:#2A0D0D;color:#F87171}
+
+  /* ── PEDIDOS: order items ─────────────────────────────── */
+  .items-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+  .order-item{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px 12px}
+  .oi-name{flex:1;font-size:13px;font-weight:600}
+  .oi-sku{font-size:11px;color:var(--muted);font-family:monospace}
+  .oi-qty{width:56px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:5px 8px;color:var(--white);font-family:var(--font);font-size:13px;text-align:center;outline:none}
+  .oi-qty:focus{border-color:var(--red)}
+  .oi-price{font-family:var(--font-display);font-size:15px;font-weight:700;min-width:70px;text-align:right}
+  .oi-remove{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 6px}
+  .oi-remove:hover{color:#E74C3C}
+  .add-product-row{display:flex;gap:8px;align-items:center}
+
+  /* ── PEDIDOS: totals ──────────────────────────────────── */
+  .totales{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px 16px;margin-top:10px}
+  .total-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid var(--border)}
+  .total-row:last-child{border-bottom:none;padding-top:10px}
+  .total-final{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--white)}
+  .total-final-bs{font-size:13px;color:var(--muted)}
+
+  /* ── PEDIDOS: payment method selector ────────────────── */
+  .pago-methods{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .pago-method{border:1px solid var(--border);border-radius:6px;padding:10px 14px;cursor:pointer;transition:all .15s;background:var(--surface)}
+  .pago-method:hover{border-color:#555}
+  .pago-method.selected{border-color:var(--red);background:#1A0808}
+  .pago-method .pm-title{font-size:13px;font-weight:600;margin-bottom:2px}
+  .pago-method .pm-detail{font-size:11px;color:var(--muted)}
+
+  /* ── PEDIDOS: detail panel ────────────────────────────── */
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+  .detail-item{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:10px 14px}
+  .detail-key{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px}
+  .detail-val{font-size:14px;font-weight:600;color:var(--white)}
+
+  /* ── PEDIDOS: timeline ────────────────────────────────── */
+  .timeline{margin:16px 0}
+  .tl-item{display:flex;gap:12px;padding:8px 0}
+  .tl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+  .tl-dot.done{background:var(--green)}
+  .tl-dot.current{background:var(--amber);box-shadow:0 0 0 3px rgba(243,156,18,.2)}
+  .tl-dot.pending{background:var(--border)}
+  .tl-line{width:1px;background:var(--border);margin:0 4.5px;flex-shrink:0}
+  .tl-content{flex:1}
+  .tl-label{font-size:13px;font-weight:600}
+
+  /* ── PEDIDOS: whatsapp button ─────────────────────────── */
+  .wa-btn{background:#075e54;color:#fff;border:none;border-radius:4px;padding:9px 18px;font-family:var(--font);font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;letter-spacing:.4px;text-decoration:none;transition:background .15s}
+  .wa-btn:hover{background:#128c7e}
+
+  /* ── CLIENTES: card grid ───────────────────────────────── */
+  .clients-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+  .client-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;cursor:pointer;transition:all .15s;position:relative}
+  .client-card:hover{border-color:#555;background:var(--surface2)}
+  .client-card.vip{border-color:#856404;background:#1A1500}
+  .client-card.vip:hover{border-color:var(--amber)}
+  .client-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;font-weight:700;flex-shrink:0;margin-bottom:10px}
+  .card-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+  .card-name{font-weight:700;font-size:15px;color:var(--white);line-height:1.2}
+  .card-phone{font-size:12px;color:var(--muted);margin-top:2px}
+  .card-city{font-size:12px;color:var(--muted)}
+  .card-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
+  .cs-item{text-align:center}
+  .cs-val{font-family:var(--font-display);font-size:16px;font-weight:700}
+  .cs-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .card-actions{display:flex;gap:6px;margin-top:10px}
+  .vip-badge{position:absolute;top:10px;right:10px;background:#856404;color:var(--amber);font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;letter-spacing:.5px}
+  .tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;margin-right:4px;margin-bottom:4px}
+  .tag-motor{background:#1A2A3A;color:#5B9BD5}
+  .tag-electrico{background:#1A2A1A;color:#5BD57A}
+  .tag-frenos{background:#2A1A1A;color:#D5795B}
+  .tag-suspension{background:#1A2A2A;color:#5BD5C4}
+  .tag-transmision{background:#2A1A2A;color:#D55BB5}
+
+  /* ── CLIENTES: order mini / view toggle ────────────────── */
+  .order-mini{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--surface);border:1px solid var(--border);border-radius:4px;margin-bottom:6px;font-size:13px;cursor:pointer;transition:background .12s}
+  .order-mini:hover{background:var(--surface2)}
+  .st-pill{padding:2px 8px;border-radius:3px;font-size:10px;font-weight:700;text-transform:uppercase}
+  .view-toggle{display:flex;gap:4px}
+  .vt-btn{padding:6px 12px;border-radius:4px;border:1px solid var(--border);background:none;color:var(--muted);font-size:16px;cursor:pointer;transition:all .15s}
+  .vt-btn.active{background:var(--surface2);color:var(--white);border-color:#555}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  LOGIN SCREEN                                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">DG <span>MOTORS</span></div>
+    <div class="login-sub">Panel de administración</div>
+    <div class="login-group">
+      <label class="login-label">Usuario</label>
+      <input class="login-input" id="login-user" type="text" placeholder="admin" autocomplete="username">
+    </div>
+    <div class="login-group">
+      <label class="login-label">Contraseña</label>
+      <input class="login-input" id="login-pass" type="password" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Ingresar al panel</button>
+    <div class="login-error" id="login-error">Usuario o contraseña incorrectos</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  ADMIN APP                                          -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div id="admin-app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">DG <span>MOTORS</span></div>
+
+    <nav class="topbar-nav">
+      <button class="nav-tab active" data-tab="catalogo"    onclick="switchTab('catalogo')">Catálogo</button>
+      <button class="nav-tab"        data-tab="inventario"  onclick="switchTab('inventario')">Inventario</button>
+      <button class="nav-tab"        data-tab="pedidos"     onclick="switchTab('pedidos')">Pedidos</button>
+      <button class="nav-tab"        data-tab="clientes"    onclick="switchTab('clientes')">Clientes</button>
+      <button class="nav-tab"        data-tab="config"      onclick="switchTab('config')">Configuración</button>
+    </nav>
+
+    <!-- BCV Widget -->
+    <div class="bcv-widget" title="Tasa BCV actual">
+      <span style="font-size:11px;color:var(--muted)">BCV</span>
+      <span class="bcv-rate" id="topbar-bcv-rate">—</span>
+      <span class="bcv-date" id="topbar-bcv-date"></span>
+      <button class="bcv-refresh" onclick="openBCVModal()" title="Actualizar tasa">⟳</button>
+    </div>
+
+    <div class="topbar-right">
+      <!-- Tab-specific action buttons (shown/hidden per tab) -->
+      <div id="tab-actions-catalogo">
+        <button class="btn btn-primary btn-sm" onclick="catOpenModal()">+ Nuevo producto</button>
+        <button class="btn btn-ghost btn-sm" onclick="catExportCSV()">⬇ CSV</button>
+      </div>
+      <div id="tab-actions-inventario" style="display:none">
+        <button class="btn btn-success btn-sm" onclick="invOpenMovModal('entrada')">+ Entrada</button>
+        <button class="btn btn-warn btn-sm" onclick="invOpenMovModal('salida')">− Salida</button>
+        <button class="btn btn-ghost btn-sm" onclick="invExportCSV()">⬇ CSV</button>
+      </div>
+      <div id="tab-actions-pedidos" style="display:none">
+        <button class="btn btn-primary btn-sm" onclick="pedOpenNewOrder()">+ Nuevo pedido</button>
+        <button class="btn btn-ghost btn-sm" onclick="pedExportCSV()">⬇ CSV</button>
+      </div>
+      <div id="tab-actions-clientes" style="display:none">
+        <button class="btn btn-primary btn-sm" onclick="cliOpenNewClient()">+ Nuevo cliente</button>
+        <button class="btn btn-ghost btn-sm" onclick="cliExportCSV()">⬇ CSV</button>
+        <button class="btn btn-ghost btn-sm" onclick="cliOpenBroadcast()">💬 Mensaje masivo</button>
+      </div>
+      <div id="tab-actions-config" style="display:none"></div>
+
+      <button class="btn btn-ghost btn-sm" onclick="window.open('dg-motors-tienda.html','_blank')" title="Ver tienda pública">Ver tienda ↗</button>
+      <button class="btn btn-ghost btn-sm" onclick="doLogout()" title="Cerrar sesión">⏻ Salir</button>
+    </div>
+  </div><!-- /topbar -->
+
+  <!-- ─────────────────────────────────────── SECCIÓN: CATÁLOGO -->
+  <div class="admin-section active" id="section-catalogo">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Categorías</div>
+          <div class="sidebar-item active" onclick="catFilterCat('todas',this)">Todas <span class="sidebar-badge" id="cat-badge-todas">0</span></div>
+          <div class="sidebar-item" onclick="catFilterCat('Motor',this)">Motor <span class="sidebar-badge" id="cat-badge-Motor">0</span></div>
+          <div class="sidebar-item" onclick="catFilterCat('Eléctrico',this)">Eléctrico <span class="sidebar-badge" id="cat-badge-Eléctrico">0</span></div>
+          <div class="sidebar-item" onclick="catFilterCat('Transmisión',this)">Transmisión <span class="sidebar-badge" id="cat-badge-Transmisión">0</span></div>
+          <div class="sidebar-item" onclick="catFilterCat('Frenos',this)">Frenos <span class="sidebar-badge" id="cat-badge-Frenos">0</span></div>
+          <div class="sidebar-item" onclick="catFilterCat('Suspensión',this)">Suspensión <span class="sidebar-badge" id="cat-badge-Suspensión">0</span></div>
+          <div class="sidebar-item" onclick="catFilterCat('Carrocería',this)">Carrocería <span class="sidebar-badge" id="cat-badge-Carrocería">0</span></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Stock</div>
+          <div class="sidebar-item" onclick="catFilterStock('ok',this)">✓ Disponible</div>
+          <div class="sidebar-item" onclick="catFilterStock('low',this)">⚠ Stock bajo</div>
+          <div class="sidebar-item" onclick="catFilterStock('out',this)">✗ Agotado</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Compatibilidad</div>
+          <div class="sidebar-item" onclick="catFilterMarca('Honda')">Honda</div>
+          <div class="sidebar-item" onclick="catFilterMarca('Yamaha')">Yamaha</div>
+          <div class="sidebar-item" onclick="catFilterMarca('Suzuki')">Suzuki</div>
+          <div class="sidebar-item" onclick="catFilterMarca('Daytona')">Daytona</div>
+          <div class="sidebar-item" onclick="catFilterMarca('Bajaj')">Bajaj</div>
+        </div>
+      </aside>
+      <main class="main">
+        <!-- STATS -->
+        <div class="stats-row stats-4">
+          <div class="stat-card"><div class="stat-label">Total productos</div><div class="stat-value sv-white" id="cat-st-total">0</div></div>
+          <div class="stat-card"><div class="stat-label">En stock</div><div class="stat-value sv-green" id="cat-st-stock">0</div></div>
+          <div class="stat-card"><div class="stat-label">Stock bajo</div><div class="stat-value sv-amber" id="cat-st-low">0</div></div>
+          <div class="stat-card"><div class="stat-label">Agotados</div><div class="stat-value sv-red" id="cat-st-out">0</div></div>
+        </div>
+        <!-- BCV BAR -->
+        <div class="bcv-bar">
+          Tasa BCV referencial: <strong id="cat-tasa-val">— Bs/USD</strong>
+          <button class="btn btn-ghost btn-sm" onclick="openBCVModal()">⟳ Actualizar tasa</button>
+        </div>
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="si">🔍</span>
+            <input type="text" id="cat-search" placeholder="Buscar nombre, SKU, modelo, marca..." oninput="renderCatalogo()">
+          </div>
+          <select class="filter-select" id="cat-sort" onchange="renderCatalogo()">
+            <option value="nombre">Nombre A-Z</option>
+            <option value="precio">Precio</option>
+            <option value="stock">Stock</option>
+            <option value="reciente">Más reciente</option>
+          </select>
+        </div>
+        <!-- TABLE -->
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Producto</th><th>Categoría</th><th>Compatible con</th>
+                <th>Precio USD</th><th>Precio Bs</th><th>Stock</th>
+                <th>Medidas</th><th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cat-tbody"></tbody>
+          </table>
+          <div class="pagination">
+            <span id="cat-pag-info">—</span>
+            <div class="page-btns" id="cat-pag-btns"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── SECCIÓN: INVENTARIO -->
+  <div class="admin-section" id="section-inventario">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Vista</div>
+          <div class="sidebar-item active" id="inv-sb-stock" onclick="invSetView('stock',this)">Stock actual <span class="sidebar-badge" id="inv-sb-total">0</span></div>
+          <div class="sidebar-item" id="inv-sb-hist" onclick="invSetView('historial',this)">Historial</div>
+          <div class="sidebar-item" id="inv-sb-rep" onclick="invSetView('reporte',this)">Reporte</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Filtrar stock</div>
+          <div class="sidebar-item" onclick="invSetStockFilter('todos',this)">Todos</div>
+          <div class="sidebar-item" onclick="invSetStockFilter('ok',this)">✓ En stock</div>
+          <div class="sidebar-item" onclick="invSetStockFilter('low',this)"><span class="alert-dot"></span>Stock bajo</div>
+          <div class="sidebar-item" onclick="invSetStockFilter('out',this)">✗ Agotados</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Categoría</div>
+          <div class="sidebar-item" onclick="invSetCatFilter('todas',this)">Todas</div>
+          <div class="sidebar-item" onclick="invSetCatFilter('Motor',this)">Motor</div>
+          <div class="sidebar-item" onclick="invSetCatFilter('Eléctrico',this)">Eléctrico</div>
+          <div class="sidebar-item" onclick="invSetCatFilter('Transmisión',this)">Transmisión</div>
+          <div class="sidebar-item" onclick="invSetCatFilter('Frenos',this)">Frenos</div>
+          <div class="sidebar-item" onclick="invSetCatFilter('Suspensión',this)">Suspensión</div>
+          <div class="sidebar-item" onclick="invSetCatFilter('Carrocería',this)">Carrocería</div>
+        </div>
+      </aside>
+      <main class="main">
+        <!-- STATS -->
+        <div class="stats-row stats-5">
+          <div class="stat-card"><div class="stat-label">Total productos</div><div class="stat-value sv-white" id="inv-st-total">0</div></div>
+          <div class="stat-card"><div class="stat-label">En stock</div><div class="stat-value sv-green" id="inv-st-ok">0</div></div>
+          <div class="stat-card"><div class="stat-label">Stock bajo</div><div class="stat-value sv-amber" id="inv-st-low">0</div></div>
+          <div class="stat-card"><div class="stat-label">Agotados</div><div class="stat-value sv-red" id="inv-st-out">0</div></div>
+          <div class="stat-card"><div class="stat-label">Movimientos hoy</div><div class="stat-value sv-blue" id="inv-st-mov">0</div></div>
+        </div>
+        <!-- ALERTAS -->
+        <div class="inv-alert-panel" id="inv-alert-panel" style="display:none">
+          <div class="inv-alert-panel-title">⚠ Productos con stock bajo o agotado</div>
+          <div id="inv-alert-list"></div>
+        </div>
+        <!-- STOCK VIEW -->
+        <div id="inv-view-stock">
+          <div class="toolbar">
+            <div class="search-box">
+              <span class="si">🔍</span>
+              <input type="text" id="inv-search-stock" placeholder="Buscar producto, SKU..." oninput="invRenderStock()">
+            </div>
+            <select class="filter-select" id="inv-sort-stock" onchange="invRenderStock()">
+              <option value="nombre">Nombre A-Z</option>
+              <option value="stock-asc">Stock: menor primero</option>
+              <option value="stock-desc">Stock: mayor primero</option>
+              <option value="cat">Categoría</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th><th>Categoría</th><th>Stock actual</th>
+                  <th>Mín. alerta</th><th>Valor inventario</th><th>Ubicación</th>
+                  <th>Movimiento rápido</th><th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="inv-stock-tbody"></tbody>
+            </table>
+            <div class="pagination">
+              <span id="inv-stock-pag-info">—</span>
+              <div class="page-btns" id="inv-stock-pag-btns"></div>
+            </div>
+          </div>
+        </div>
+        <!-- HISTORIAL VIEW -->
+        <div id="inv-view-historial" style="display:none">
+          <div class="toolbar">
+            <div class="search-box">
+              <span class="si">🔍</span>
+              <input type="text" id="inv-search-hist" placeholder="Buscar en historial..." oninput="invRenderHist()">
+            </div>
+            <select class="filter-select" id="inv-filter-hist-type" onchange="invRenderHist()">
+              <option value="todos">Todos los tipos</option>
+              <option value="entrada">Entradas</option>
+              <option value="salida">Salidas</option>
+              <option value="ajuste">Ajustes</option>
+              <option value="devolucion">Devoluciones</option>
+            </select>
+            <button class="btn btn-ghost btn-sm" onclick="invClearHistory()">🗑 Limpiar historial</button>
+          </div>
+          <div id="inv-hist-list"></div>
+          <p id="inv-hist-empty" style="display:none;color:var(--muted);font-size:14px;padding:40px;text-align:center">Sin movimientos registrados aún.</p>
+        </div>
+        <!-- REPORTE VIEW -->
+        <div id="inv-view-reporte" style="display:none">
+          <div class="report-grid">
+            <div class="report-card">
+              <div class="report-card-title">Productos más valiosos (stock × precio)</div>
+              <div id="inv-rpt-valor"></div>
+            </div>
+            <div class="report-card">
+              <div class="report-card-title">Stock por categoría</div>
+              <div id="inv-rpt-cat"></div>
+            </div>
+            <div class="report-card">
+              <div class="report-card-title">Más movimientos (últimos 30 días)</div>
+              <div id="inv-rpt-mov"></div>
+            </div>
+            <div class="report-card">
+              <div class="report-card-title">Resumen de valor total</div>
+              <div id="inv-rpt-resumen"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── SECCIÓN: PEDIDOS -->
+  <div class="admin-section" id="section-pedidos">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Estado</div>
+          <div class="sidebar-item s-todos active" onclick="pedSetFilter('todos',this)">Todos <span class="sidebar-badge" id="ped-sb-todos">0</span></div>
+          <div class="sidebar-item s-pendiente" onclick="pedSetFilter('pendiente',this)">⏳ Pendiente <span class="sidebar-badge" id="ped-sb-pendiente">0</span></div>
+          <div class="sidebar-item s-confirmado" onclick="pedSetFilter('confirmado',this)">✓ Confirmado <span class="sidebar-badge" id="ped-sb-confirmado">0</span></div>
+          <div class="sidebar-item s-preparando" onclick="pedSetFilter('preparando',this)">🔧 Preparando <span class="sidebar-badge" id="ped-sb-preparando">0</span></div>
+          <div class="sidebar-item s-despachado" onclick="pedSetFilter('despachado',this)">🚚 Despachado <span class="sidebar-badge" id="ped-sb-despachado">0</span></div>
+          <div class="sidebar-item s-entregado" onclick="pedSetFilter('entregado',this)">✅ Entregado <span class="sidebar-badge" id="ped-sb-entregado">0</span></div>
+          <div class="sidebar-item s-cancelado" onclick="pedSetFilter('cancelado',this)">✗ Cancelado <span class="sidebar-badge" id="ped-sb-cancelado">0</span></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Pago</div>
+          <div class="sidebar-item" onclick="pedSetPayFilter('todos',this)">Todos</div>
+          <div class="sidebar-item" onclick="pedSetPayFilter('pendiente',this)">⚠ Sin pagar</div>
+          <div class="sidebar-item" onclick="pedSetPayFilter('pagado',this)">✓ Pagados</div>
+          <div class="sidebar-item" onclick="pedSetPayFilter('parcial',this)">≈ Pago parcial</div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Método de pago</div>
+          <div class="sidebar-item" onclick="pedSetMetodoFilter('todos',this)">Todos</div>
+          <div class="sidebar-item" onclick="pedSetMetodoFilter('pago_movil',this)">📱 Pago móvil</div>
+          <div class="sidebar-item" onclick="pedSetMetodoFilter('zelle',this)">💵 Zelle</div>
+          <div class="sidebar-item" onclick="pedSetMetodoFilter('usdt',this)">₿ USDT</div>
+          <div class="sidebar-item" onclick="pedSetMetodoFilter('transferencia',this)">🏦 Transferencia</div>
+          <div class="sidebar-item" onclick="pedSetMetodoFilter('efectivo',this)">💴 Efectivo</div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="stats-row stats-5">
+          <div class="stat-card" onclick="pedSetFilter('todos',document.querySelector('#section-pedidos .s-todos'))">
+            <div class="stat-label">Total pedidos</div>
+            <div class="stat-value sv-white" id="ped-st-total">0</div>
+          </div>
+          <div class="stat-card" onclick="pedSetFilter('pendiente',document.querySelector('#section-pedidos .s-pendiente'))">
+            <div class="stat-label">Pendientes</div>
+            <div class="stat-value sv-amber" id="ped-st-pend">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ingresos hoy (USD)</div>
+            <div class="stat-value sv-green" id="ped-st-hoy">$0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Ingresos mes (USD)</div>
+            <div class="stat-value sv-blue" id="ped-st-mes">$0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Sin pagar</div>
+            <div class="stat-value sv-red" id="ped-st-unpaid">0</div>
+          </div>
+        </div>
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="si">🔍</span>
+            <input type="text" id="ped-search-input" placeholder="Buscar por cliente, # pedido, producto..." oninput="renderPedidos()">
+          </div>
+          <select class="filter-select" id="ped-sort-sel" onchange="renderPedidos()">
+            <option value="fecha-desc">Más reciente</option>
+            <option value="fecha-asc">Más antiguo</option>
+            <option value="total-desc">Mayor monto</option>
+            <option value="total-asc">Menor monto</option>
+          </select>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th># Pedido</th>
+                <th>Cliente</th>
+                <th>Productos</th>
+                <th>Total USD</th>
+                <th>Total Bs</th>
+                <th>Método pago</th>
+                <th>Pago</th>
+                <th>Estado</th>
+                <th>Fecha</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody id="ped-orders-tbody"></tbody>
+          </table>
+          <div class="pagination">
+            <span id="ped-pag-info">—</span>
+            <div class="page-btns" id="ped-pag-btns"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── SECCIÓN: CLIENTES -->
+  <div class="admin-section" id="section-clientes">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Segmento</div>
+          <div class="sidebar-item active" onclick="cliSetSeg('todos',this)">Todos <span class="sidebar-badge" id="sb-todos">0</span></div>
+          <div class="sidebar-item" onclick="cliSetSeg('vip',this)">⭐ VIP <span class="sidebar-badge" id="sb-vip">0</span></div>
+          <div class="sidebar-item" onclick="cliSetSeg('frecuente',this)">🔁 Frecuentes <span class="sidebar-badge" id="sb-frecuente">0</span></div>
+          <div class="sidebar-item" onclick="cliSetSeg('nuevo',this)">🆕 Nuevos <span class="sidebar-badge" id="sb-nuevo">0</span></div>
+          <div class="sidebar-item" onclick="cliSetSeg('inactivo',this)">💤 Inactivos <span class="sidebar-badge" id="sb-inactivo">0</span></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Ciudad</div>
+          <div id="city-filters"></div>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Método de pago preferido</div>
+          <div class="sidebar-item" onclick="cliSetMetodo('todos',this)">Todos</div>
+          <div class="sidebar-item" onclick="cliSetMetodo('pago_movil',this)">📱 Pago móvil</div>
+          <div class="sidebar-item" onclick="cliSetMetodo('zelle',this)">💵 Zelle</div>
+          <div class="sidebar-item" onclick="cliSetMetodo('usdt',this)">₿ USDT</div>
+          <div class="sidebar-item" onclick="cliSetMetodo('transferencia',this)">🏦 Transferencia</div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="stats-row stats-4">
+          <div class="stat-card"><div class="stat-label">Total clientes</div><div class="stat-value sv-white" id="st-total">0</div></div>
+          <div class="stat-card"><div class="stat-label">Clientes VIP</div><div class="stat-value sv-amber" id="st-vip">0</div></div>
+          <div class="stat-card"><div class="stat-label">Ingresos totales</div><div class="stat-value sv-green" id="st-ingresos">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Ticket promedio</div><div class="stat-value sv-blue" id="st-ticket">$0</div></div>
+        </div>
+        <div class="toolbar">
+          <div class="search-box">
+            <span class="si">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar por nombre, teléfono, ciudad..." oninput="renderClientes()">
+          </div>
+          <select class="filter-select" id="sort-sel" onchange="renderClientes()">
+            <option value="nombre">Nombre A-Z</option>
+            <option value="pedidos">Más pedidos</option>
+            <option value="gasto">Mayor gasto</option>
+            <option value="reciente">Más reciente</option>
+          </select>
+          <div class="view-toggle">
+            <button class="vt-btn active" id="btn-grid" onclick="cliSetViewMode('grid')" title="Tarjetas">⊞</button>
+            <button class="vt-btn" id="btn-list" onclick="cliSetViewMode('list')" title="Lista">☰</button>
+          </div>
+        </div>
+        <div id="grid-view"><div class="clients-grid" id="clients-grid"></div></div>
+        <div id="list-view" style="display:none">
+          <div class="table-wrap">
+            <table>
+              <thead><tr>
+                <th>Cliente</th><th>Teléfono</th><th>Ciudad</th>
+                <th>Pedidos</th><th>Total gastado</th><th>Último pedido</th>
+                <th>Pago preferido</th><th>Segmento</th><th>Acciones</th>
+              </tr></thead>
+              <tbody id="clients-tbody"></tbody>
+            </table>
+            <div class="pagination"><span id="pag-info">—</span><div class="page-btns" id="pag-btns"></div></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;text-align:center;font-size:12px;color:var(--muted)" id="pag-info-grid"></div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────── SECCIÓN: CONFIGURACIÓN -->
+  <div class="admin-section" id="section-config">
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Configuración</div>
+          <div class="sidebar-item active" onclick="cfgShowPanel('tienda',this)">🏪 Tienda</div>
+          <div class="sidebar-item" onclick="cfgShowPanel('acceso',this)">🔐 Acceso admin</div>
+          <div class="sidebar-item" onclick="cfgShowPanel('bcv',this)">📊 API BCV</div>
+        </div>
+      </aside>
+      <main class="main">
+
+        <!-- Config: Tienda -->
+        <div id="cfg-panel-tienda">
+          <div class="config-card">
+            <div class="config-card-title">Datos de la tienda</div>
+            <div class="form-grid">
+              <div class="form-group full">
+                <label class="form-label">Nombre de la tienda</label>
+                <input class="form-input" id="cfg-store-name" placeholder="DG Motors">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Número WhatsApp (con código de país)</label>
+                <input class="form-input" id="cfg-wa-number" placeholder="584140000000">
+                <span class="form-hint">Ejemplo: 584140000000 (sin + ni espacios)</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Tasa BCV manual (Bs por 1 USD)</label>
+                <input class="form-input" id="cfg-tasa-manual" type="number" placeholder="560.00" step="0.01">
+              </div>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:10px">
+              <button class="btn btn-primary" onclick="cfgSaveTienda()">Guardar cambios</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Config: Acceso -->
+        <div id="cfg-panel-acceso" style="display:none">
+          <div class="config-card">
+            <div class="config-card-title">Credenciales de acceso</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Usuario admin</label>
+                <input class="form-input" id="cfg-admin-user" placeholder="admin">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Contraseña actual</label>
+                <input class="form-input" id="cfg-pass-old" type="password" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nueva contraseña</label>
+                <input class="form-input" id="cfg-pass-new" type="password" placeholder="••••••••">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Confirmar nueva contraseña</label>
+                <input class="form-input" id="cfg-pass-confirm" type="password" placeholder="••••••••">
+              </div>
+            </div>
+            <div style="margin-top:16px">
+              <button class="btn btn-primary" onclick="cfgSaveAcceso()">Cambiar contraseña</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Config: BCV API -->
+        <div id="cfg-panel-bcv" style="display:none">
+          <div class="config-card">
+            <div class="config-card-title">API BCV — bcvapi.tech</div>
+            <p style="font-size:13px;color:var(--muted);margin-bottom:16px;line-height:1.6">
+              Configura tu API key de <strong style="color:var(--white)">bcvapi.tech</strong> para actualizar la tasa BCV automáticamente. La tasa se usa en toda la plataforma para calcular precios en bolívares.
+            </p>
+            <div class="form-group" style="margin-bottom:16px">
+              <label class="form-label">API Key</label>
+              <input class="form-input" id="cfg-bcv-key" type="password" placeholder="tu-api-key-aquí">
+              <span class="form-hint">Se guarda localmente en tu navegador, nunca se envía a ningún servidor externo.</span>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn btn-primary" onclick="cfgSaveBCVKey()">Guardar API Key</button>
+              <button class="btn btn-success" onclick="fetchBCV()">⟳ Actualizar tasa ahora</button>
+              <div id="cfg-bcv-status" style="font-size:12px;color:var(--muted)"></div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div><!-- /section-config -->
+
+</div><!-- /admin-app -->
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  MODAL BCV                                          -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="bcv-modal" onclick="if(event.target===this)closeBCVModal()">
+  <div class="modal bcv-modal">
+    <div class="modal-header">
+      <div class="modal-title">📊 Tasa BCV</div>
+      <button class="modal-close" onclick="closeBCVModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:16px;margin-bottom:18px;text-align:center">
+        <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Tasa actual</div>
+        <div style="font-family:var(--font-display);font-size:36px;font-weight:700;color:var(--amber)" id="bcv-modal-rate">—</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px" id="bcv-modal-date">Sin fecha</div>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Actualizar tasa manualmente</label>
+        <input class="form-input" id="bcv-manual-input" type="number" placeholder="Ej: 560.38" step="0.01" min="1">
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-success" onclick="fetchBCV()" style="flex:1">⟳ Obtener desde API</button>
+        <button class="btn btn-secondary" onclick="bcvManualSave()" style="flex:1">✓ Guardar manual</button>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeBCVModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  MODAL: PRODUCTO (CATÁLOGO)                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="cat-modal" onclick="closeBD(event,'cat-modal')">
+  <div class="modal" style="max-width:760px;max-height:90vh;overflow-y:auto">
+    <div class="modal-header">
+      <div class="modal-title" id="cat-modal-title">Nuevo producto</div>
+      <button class="modal-close" onclick="catCloseModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-section">Información básica</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label class="form-label">Nombre del repuesto *</label>
+          <input type="text" class="form-input" id="cat-f-nombre" placeholder="Ej: Carburador completo PE24">
+        </div>
+        <div class="form-group">
+          <label class="form-label">SKU / Código interno</label>
+          <input type="text" class="form-input" id="cat-f-sku" placeholder="Ej: DGM-001">
+          <span class="form-hint">Se genera automáticamente si lo dejas vacío</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Categoría *</label>
+          <select class="form-input" id="cat-f-categoria">
+            <option value="">Seleccionar...</option>
+            <option>Motor</option><option>Eléctrico</option><option>Transmisión</option>
+            <option>Frenos</option><option>Suspensión</option><option>Carrocería</option>
+            <option>Lubricantes</option><option>Accesorios</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tipo de repuesto</label>
+          <select class="form-input" id="cat-f-tipo">
+            <option value="">Seleccionar...</option>
+            <option>Original</option><option>Alternativo</option>
+            <option>Genérico</option><option>Remanufacturado</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Marca del repuesto</label>
+          <input type="text" class="form-input" id="cat-f-marca-rep" placeholder="Ej: Mikuni, NGK, Brembo">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Descripción</label>
+          <textarea class="form-input" id="cat-f-descripcion" placeholder="Descripción detallada del repuesto, características..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">Compatibilidad de vehículo</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Marca de moto / vehículo</label>
+          <select class="form-input" id="cat-f-marca-moto">
+            <option value="">Seleccionar...</option>
+            <option>Honda</option><option>Yamaha</option><option>Suzuki</option>
+            <option>Kawasaki</option><option>Daytona</option><option>Bajaj</option>
+            <option>TVS</option><option>Universales</option><option>Múltiples marcas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Modelo(s)</label>
+          <input type="text" class="form-input" id="cat-f-modelo" placeholder="Ej: Wave, Fan, CBF150">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Año desde</label>
+          <input type="number" class="form-input" id="cat-f-año-desde" placeholder="2018" min="1990" max="2030">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Año hasta</label>
+          <input type="number" class="form-input" id="cat-f-año-hasta" placeholder="2024" min="1990" max="2030">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cilindraje</label>
+          <select class="form-input" id="cat-f-cilindraje">
+            <option value="">Todos</option>
+            <option>100cc</option><option>110cc</option><option>125cc</option>
+            <option>150cc</option><option>200cc</option><option>250cc</option><option>300cc+</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Número OEM (original)</label>
+          <input type="text" class="form-input" id="cat-f-oem" placeholder="Ej: 16100-GFC-671">
+        </div>
+      </div>
+
+      <div class="form-section">Precio e inventario</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Precio en USD *</label>
+          <input type="number" class="form-input" id="cat-f-precio" placeholder="0.00" step="0.01" min="0" oninput="catCalcBs()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Precio en Bs (automático)</label>
+          <input type="text" class="form-input" id="cat-f-precio-bs" placeholder="Se calcula solo" readonly style="opacity:.6">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Stock actual *</label>
+          <input type="number" class="form-input" id="cat-f-stock" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alerta stock bajo</label>
+          <input type="number" class="form-input" id="cat-f-stock-min" placeholder="3" min="0">
+          <span class="form-hint">Aviso cuando llegue a este número</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Descuento (%)</label>
+          <input type="number" class="form-input" id="cat-f-descuento" placeholder="0" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ubicación en almacén</label>
+          <input type="text" class="form-input" id="cat-f-ubicacion" placeholder="Ej: Estante A3 · Caja 2">
+        </div>
+      </div>
+
+      <div class="form-section">Peso y medidas</div>
+      <div class="medidas-grid">
+        <div class="form-group">
+          <label class="form-label">Peso (kg)</label>
+          <input type="number" class="form-input" id="cat-f-peso" placeholder="0.000" step="0.001" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Largo (cm)</label>
+          <input type="number" class="form-input" id="cat-f-largo" placeholder="0.0" step="0.1" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ancho (cm)</label>
+          <input type="number" class="form-input" id="cat-f-ancho" placeholder="0.0" step="0.1" min="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alto (cm)</label>
+          <input type="number" class="form-input" id="cat-f-alto" placeholder="0.0" step="0.1" min="0">
+        </div>
+      </div>
+
+      <div class="form-section">Fotos / Archivos</div>
+      <div class="upload-zone" onclick="document.getElementById('cat-file-input').click()">
+        <div style="font-size:32px;margin-bottom:4px">📷</div>
+        <strong>Haz clic para subir fotos o videos</strong>
+        <p style="font-size:13px;color:var(--muted);margin-top:4px">JPG, PNG, MP4 · Máx. 10 archivos · 20 MB c/u</p>
+      </div>
+      <input type="file" id="cat-file-input" multiple accept="image/*,video/*" style="display:none" onchange="catHandleFiles(event)">
+      <div id="cat-media-preview" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"></div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="catCloseModal()">Cancelar</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" onclick="catSaveProduct(true)">Guardar borrador</button>
+        <button class="btn btn-primary" onclick="catSaveProduct(false)">Publicar producto</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  MODAL: MOVIMIENTO (INVENTARIO)                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="inv-mov-modal" onclick="if(event.target===this)invCloseMovModal()">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title" id="inv-mm-title">Registrar movimiento</div>
+      <button class="modal-close" onclick="invCloseMovModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Tipo de movimiento</label>
+        <select class="form-input" id="inv-mm-tipo" onchange="invOnTipoChange()">
+          <option value="entrada">📦 Entrada — ingreso de stock</option>
+          <option value="salida">📤 Salida — despacho / venta</option>
+          <option value="ajuste">✏ Ajuste — corrección de inventario</option>
+          <option value="devolucion">↩ Devolución — regreso de producto</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Producto *</label>
+        <select class="form-input" id="inv-mm-producto" onchange="invOnProdChange()">
+          <option value="">Seleccionar producto...</option>
+        </select>
+      </div>
+      <div id="inv-mm-stock-actual" style="display:none;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:10px 14px;margin-bottom:14px;font-size:13px">
+        Stock actual: <strong id="inv-mm-stock-val" style="color:var(--amber)">—</strong> unidades
+      </div>
+      <div class="form-group" id="inv-mm-cant-group">
+        <label class="form-label">Cantidad *</label>
+        <input type="number" class="form-input" id="inv-mm-cantidad" placeholder="0" min="1" step="1">
+      </div>
+      <div class="form-group" id="inv-mm-ajuste-group" style="display:none">
+        <label class="form-label">Nuevo stock total (ajuste directo)</label>
+        <input type="number" class="form-input" id="inv-mm-nuevo-stock" placeholder="Ej: 15" min="0">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Motivo / Nota</label>
+        <input type="text" class="form-input" id="inv-mm-nota" placeholder="Ej: Compra proveedor, venta presencial, error de conteo...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Proveedor / Referencia</label>
+        <input type="text" class="form-input" id="inv-mm-ref" placeholder="Ej: Distribuidora Norte, Pedido #045">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Costo unitario (USD) — opcional</label>
+        <input type="number" class="form-input" id="inv-mm-costo" placeholder="0.00" step="0.01" min="0">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="invCloseMovModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="invSaveMovimiento()">Registrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  MODAL: NUEVO / EDITAR PEDIDO                       -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="order-modal" onclick="closeBD(event,'order-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="om-title">Nuevo pedido</div>
+      <button class="modal-close" onclick="closeModal('order-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="form-section">Cliente</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nombre *</label>
+          <input class="form-input" id="o-nombre" placeholder="Nombre completo">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teléfono / WhatsApp *</label>
+          <input class="form-input" id="o-telefono" placeholder="0414-1234567">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ciudad / Estado</label>
+          <input class="form-input" id="o-ciudad" placeholder="Caracas, Miranda...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Dirección de entrega</label>
+          <input class="form-input" id="o-direccion" placeholder="Dirección completa">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Nota del cliente</label>
+          <textarea class="form-input" id="o-nota" placeholder="Indicaciones especiales..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">Productos</div>
+      <div class="items-list" id="om-items-list"></div>
+      <div class="add-product-row">
+        <select class="form-input" id="om-add-prod" style="flex:1">
+          <option value="">Agregar producto...</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="pedAddItemToOrder()">+ Agregar</button>
+      </div>
+      <div class="totales" id="om-totales">
+        <div class="total-row"><span style="color:var(--muted)">Subtotal</span><span id="om-subtotal">$0.00</span></div>
+        <div class="total-row"><span style="color:var(--muted)">Envío</span>
+          <span><input type="number" id="o-envio" value="0" min="0" step="0.5" style="width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 8px;color:var(--white);font-family:var(--font);font-size:13px;outline:none" oninput="pedRecalcTotals()"> USD</span>
+        </div>
+        <div class="total-row"><span style="color:var(--muted)">Descuento</span>
+          <span><input type="number" id="o-descuento" value="0" min="0" step="0.5" style="width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:3px 8px;color:var(--white);font-family:var(--font);font-size:13px;outline:none" oninput="pedRecalcTotals()"> USD</span>
+        </div>
+        <div class="total-row">
+          <span style="font-weight:700;font-size:14px">TOTAL</span>
+          <div style="text-align:right">
+            <div class="total-final" id="om-total">$0.00</div>
+            <div class="total-final-bs" id="om-total-bs">0 Bs</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">Método de pago</div>
+      <div class="pago-methods" id="pago-methods">
+        <div class="pago-method selected" data-metodo="pago_movil" onclick="pedSelectPago(this)">
+          <div class="pm-title">📱 Pago Móvil</div>
+          <div class="pm-detail">Transferencia en bolívares</div>
+        </div>
+        <div class="pago-method" data-metodo="zelle" onclick="pedSelectPago(this)">
+          <div class="pm-title">💵 Zelle USD</div>
+          <div class="pm-detail">Transferencia bancaria USA</div>
+        </div>
+        <div class="pago-method" data-metodo="usdt" onclick="pedSelectPago(this)">
+          <div class="pm-title">₿ USDT / Cripto</div>
+          <div class="pm-detail">Binance · TRC20 · BEP20</div>
+        </div>
+        <div class="pago-method" data-metodo="transferencia" onclick="pedSelectPago(this)">
+          <div class="pm-title">🏦 Transferencia Bs</div>
+          <div class="pm-detail">Banco venezolano</div>
+        </div>
+        <div class="pago-method" data-metodo="efectivo" onclick="pedSelectPago(this)">
+          <div class="pm-title">💴 Efectivo USD</div>
+          <div class="pm-detail">Pago presencial</div>
+        </div>
+        <div class="pago-method" data-metodo="efectivo_bs" onclick="pedSelectPago(this)">
+          <div class="pm-title">💵 Efectivo Bs</div>
+          <div class="pm-detail">Pago presencial bolívares</div>
+        </div>
+      </div>
+      <div style="margin-top:12px">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Estado del pago</label>
+            <select class="form-input" id="o-pago-estado">
+              <option value="pendiente">Pendiente</option>
+              <option value="parcial">Pago parcial</option>
+              <option value="pagado">Pagado ✓</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Referencia / Comprobante</label>
+            <input class="form-input" id="o-ref-pago" placeholder="N° de comprobante o referencia">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">Despacho</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Tipo de entrega</label>
+          <select class="form-input" id="o-despacho">
+            <option value="domicilio">A domicilio</option>
+            <option value="encomienda">Encomienda / MRW / Zoom</option>
+            <option value="retiro">Retiro en tienda</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transportista</label>
+          <input class="form-input" id="o-transportista" placeholder="MRW, Zoom, Domesa...">
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('order-modal')">Cancelar</button>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" onclick="pedSaveOrder('borrador')">Guardar borrador</button>
+        <button class="btn btn-primary" onclick="pedSaveOrder('pendiente')">Crear pedido</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  MODAL: DETALLE PEDIDO                              -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="detail-modal" onclick="closeBD(event,'detail-modal')">
+  <div class="modal" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title" id="dm-title">Pedido #—</div>
+      <button class="modal-close" onclick="closeModal('detail-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="dm-body"></div>
+    <div class="modal-footer" id="dm-footer"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  MODAL: NUEVO / EDITAR CLIENTE                      -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="client-modal" onclick="closeBD(event,'client-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="cm-title">Nuevo cliente</div>
+      <button class="modal-close" onclick="closeModal('client-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-section">Datos personales</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Nombre completo *</label>
+          <input class="form-input" id="c-nombre" placeholder="Nombre y apellido">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Teléfono / WhatsApp *</label>
+          <input class="form-input" id="c-telefono" placeholder="0414-1234567">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ciudad / Estado</label>
+          <input class="form-input" id="c-ciudad" placeholder="Caracas, Miranda...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Correo electrónico</label>
+          <input class="form-input" id="c-email" type="email" placeholder="correo@ejemplo.com">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Dirección</label>
+          <input class="form-input" id="c-direccion" placeholder="Dirección completa">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cédula / RIF</label>
+          <input class="form-input" id="c-cedula" placeholder="V-12345678">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Método de pago preferido</label>
+          <select class="form-input" id="c-metodo">
+            <option value="">Sin definir</option>
+            <option value="pago_movil">📱 Pago Móvil</option>
+            <option value="zelle">💵 Zelle</option>
+            <option value="usdt">₿ USDT</option>
+            <option value="transferencia">🏦 Transferencia Bs</option>
+            <option value="efectivo">💴 Efectivo USD</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">Vehículo(s)</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Marca de moto</label>
+          <select class="form-input" id="c-marca">
+            <option value="">Seleccionar...</option>
+            <option>Honda</option><option>Yamaha</option><option>Suzuki</option>
+            <option>Kawasaki</option><option>Daytona</option><option>Bajaj</option>
+            <option>TVS</option><option>Otra</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Modelo</label>
+          <input class="form-input" id="c-modelo" placeholder="Ej: Wave 110, Fan 125">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Año</label>
+          <input class="form-input" id="c-año" type="number" placeholder="2020" min="1990" max="2030">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <input class="form-input" id="c-color" placeholder="Rojo, negro...">
+        </div>
+      </div>
+
+      <div class="form-section">Segmento y notas</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Segmento</label>
+          <select class="form-input" id="c-segmento">
+            <option value="nuevo">🆕 Nuevo</option>
+            <option value="frecuente">🔁 Frecuente</option>
+            <option value="vip">⭐ VIP</option>
+            <option value="inactivo">💤 Inactivo</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Etiquetas</label>
+          <input class="form-input" id="c-tags" placeholder="Motor, Eléctrico, Frenos...">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Notas internas</label>
+          <textarea class="form-input" id="c-notas" placeholder="Observaciones del cliente, preferencias, historial..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('client-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="cliSaveClient()">Guardar cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  MODAL: DETALLE CLIENTE                             -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="cli-detail-modal" onclick="closeBD(event,'cli-detail-modal')">
+  <div class="modal" style="max-width:700px">
+    <div class="modal-header">
+      <div class="modal-title" id="cli-dm-title">—</div>
+      <button class="modal-close" onclick="closeModal('cli-detail-modal')">✕</button>
+    </div>
+    <div class="modal-body" id="cli-dm-body"></div>
+    <div class="modal-footer" id="cli-dm-footer"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  MODAL: MENSAJE MASIVO WHATSAPP                     -->
+<!-- ═══════════════════════════════════════════════════ -->
+<div class="modal-backdrop" id="bc-modal" onclick="closeBD(event,'bc-modal')">
+  <div class="modal" style="max-width:540px">
+    <div class="modal-header">
+      <div class="modal-title">💬 Mensaje masivo WhatsApp</div>
+      <button class="modal-close" onclick="closeModal('bc-modal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">
+        Se generará un enlace de WhatsApp individual para cada cliente del segmento seleccionado. Debes enviarlos uno por uno (WhatsApp no permite envíos masivos automáticos).
+      </p>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Segmento destinatario</label>
+        <select class="form-input" id="bc-segmento">
+          <option value="todos">Todos los clientes</option>
+          <option value="vip">Solo VIP</option>
+          <option value="frecuente">Solo frecuentes</option>
+          <option value="inactivo">Solo inactivos</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:14px">
+        <label class="form-label">Mensaje *</label>
+        <textarea class="form-input" id="bc-msg" style="min-height:120px" placeholder="Hola {nombre}, tenemos novedades en DG Motors...&#10;&#10;Usa {nombre} para personalizar con el nombre del cliente."></textarea>
+      </div>
+      <div id="bc-preview" style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px;font-size:12px;color:var(--muted);margin-bottom:4px">
+        Vista previa aparece aquí...
+      </div>
+    </div>
+    <div class="modal-footer">
+      <span style="font-size:12px;color:var(--muted)" id="bc-count">0 destinatarios</span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="closeModal('bc-modal')">Cancelar</button>
+        <button class="btn btn-wa" onclick="cliSendBroadcast()">💬 Generar enlaces WA</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCRIPT — CORE (Login, Tabs, BCV, Config)           -->
+<!-- ═══════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ─── SHARED STATE ────────────────────────────────────
+let products   = [];
+let orders     = [];
+let clients    = [];
+let movements  = [];
+let tasaBCV    = 560;
+let tasaFecha  = '';
+
+function loadData() {
+  products  = JSON.parse(localStorage.getItem('dg_products')  || '[]');
+  orders    = JSON.parse(localStorage.getItem('dg_orders')    || '[]');
+  clients   = JSON.parse(localStorage.getItem('dg_clients')   || '[]');
+  movements = JSON.parse(localStorage.getItem('dg_movements') || '[]');
+  tasaBCV   = parseFloat(localStorage.getItem('dg_tasa')      || '560');
+  tasaFecha = localStorage.getItem('dg_tasa_fecha')           || '';
+}
+
+function saveProducts()  { localStorage.setItem('dg_products',  JSON.stringify(products));  }
+function saveOrders()    { localStorage.setItem('dg_orders',    JSON.stringify(orders));    }
+function saveClients()   { localStorage.setItem('dg_clients',   JSON.stringify(clients));   }
+function saveMov()       { localStorage.setItem('dg_movements', JSON.stringify(movements)); }
+function saveTasa() {
+  localStorage.setItem('dg_tasa', tasaBCV);
+  if (tasaFecha) localStorage.setItem('dg_tasa_fecha', tasaFecha);
+}
+
+// ─── CREDENTIALS ─────────────────────────────────────
+function getCreds() {
+  return {
+    user: localStorage.getItem('dg_admin_user') || 'admin',
+    pass: localStorage.getItem('dg_admin_pass') || 'dgmotors2024',
+  };
+}
+
+// ─── AUTH ─────────────────────────────────────────────
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim();
+  const p = document.getElementById('login-pass').value;
+  const creds = getCreds();
+  if (u === creds.user && p === creds.pass) {
+    sessionStorage.setItem('dg_admin_logged', '1');
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-app').style.display    = 'flex';
+    document.getElementById('admin-app').style.flexDirection = 'column';
+    loadData();
+    seedIfEmpty();
+    const lastTab = localStorage.getItem('dg_active_tab') || 'catalogo';
+    switchTab(lastTab);
+    updateBCVDisplay();
+  } else {
+    document.getElementById('login-error').classList.add('show');
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-pass').focus();
+    setTimeout(() => document.getElementById('login-error').classList.remove('show'), 3000);
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('dg_admin_logged');
+  document.getElementById('admin-app').style.display    = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+// Allow Enter key on login form
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pass').focus(); });
+
+// ─── TAB SWITCHING ────────────────────────────────────
+function switchTab(tab) {
+  // Nav tabs
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`[data-tab="${tab}"]`);
+  if (activeTab) activeTab.classList.add('active');
+
+  // Sections
+  document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
+  const sec = document.getElementById('section-' + tab);
+  if (sec) sec.classList.add('active');
+
+  // Action buttons
+  ['catalogo','inventario','pedidos','clientes','config'].forEach(t => {
+    const el = document.getElementById('tab-actions-' + t);
+    if (el) el.style.display = (t === tab) ? 'flex' : 'none';
+  });
+
+  // Persist
+  localStorage.setItem('dg_active_tab', tab);
+
+  // Reload data and render module
+  loadData();
+  if      (tab === 'catalogo')   { renderCatalogo();   }
+  else if (tab === 'inventario') { invRenderStock();    }
+  else if (tab === 'pedidos')    { renderPedidos();     }
+  else if (tab === 'clientes')   { renderClientes();    }
+  else if (tab === 'config')     { cfgLoadValues();     }
+}
+
+// ─── BCV ──────────────────────────────────────────────
+function updateBCVDisplay() {
+  const rateEl = document.getElementById('topbar-bcv-rate');
+  const dateEl = document.getElementById('topbar-bcv-date');
+  if (rateEl) rateEl.textContent = tasaBCV.toFixed(2) + ' Bs';
+  if (dateEl) dateEl.textContent = tasaFecha || '';
+}
+
+function openBCVModal() {
+  document.getElementById('bcv-modal-rate').textContent = tasaBCV.toFixed(2) + ' Bs/USD';
+  document.getElementById('bcv-modal-date').textContent = tasaFecha ? 'Fecha: ' + tasaFecha : 'Sin fecha registrada';
+  document.getElementById('bcv-manual-input').value = tasaBCV;
+  document.getElementById('bcv-modal').classList.add('open');
+}
+function closeBCVModal() { document.getElementById('bcv-modal').classList.remove('open'); }
+
+async function fetchBCV() {
+  const apiKey = localStorage.getItem('dg_bcvapi_key') || '';
+  if (!apiKey) {
+    showToast('Configura tu API key en Configuración → API BCV', 'warn');
+    closeBCVModal();
+    switchTab('config');
+    cfgShowPanel('bcv', null);
+    return;
+  }
+  showToast('Consultando tasa BCV...', 'warn');
+  try {
+    const res  = await fetch('https://bcvapi.tech/api/v1/dolar', { headers:{ 'Authorization': apiKey } });
+    const data = await res.json();
+    tasaBCV   = parseFloat(data.tasa);
+    tasaFecha = data.fecha || new Date().toISOString().split('T')[0];
+    saveTasa();
+    updateBCVDisplay();
+    openBCVModal();
+    document.getElementById('cfg-bcv-status').textContent = 'Actualizado: ' + tasaFecha;
+    showToast('Tasa BCV: ' + tasaBCV.toFixed(2) + ' Bs/USD', 'success');
+  } catch(e) {
+    showToast('Error al obtener tasa BCV', 'err');
+  }
+}
+
+function bcvManualSave() {
+  const val = parseFloat(document.getElementById('bcv-manual-input').value);
+  if (isNaN(val) || val <= 0) { showToast('Ingresa una tasa válida', 'err'); return; }
+  tasaBCV   = val;
+  tasaFecha = new Date().toISOString().split('T')[0];
+  saveTasa();
+  updateBCVDisplay();
+  closeBCVModal();
+  showToast('Tasa actualizada: ' + tasaBCV.toFixed(2) + ' Bs/USD', 'success');
+}
+
+// ─── CONFIGURACIÓN ────────────────────────────────────
+function cfgShowPanel(panel, el) {
+  ['tienda','acceso','bcv'].forEach(p => {
+    document.getElementById('cfg-panel-' + p).style.display = (p === panel) ? 'block' : 'none';
+  });
+  if (el) {
+    document.querySelectorAll('#section-config .sidebar-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+  }
+}
+
+function cfgLoadValues() {
+  document.getElementById('cfg-store-name').value  = localStorage.getItem('dg_store_name')  || 'DG Motors';
+  document.getElementById('cfg-wa-number').value   = localStorage.getItem('dg_wa_number')   || '584140000000';
+  document.getElementById('cfg-tasa-manual').value = tasaBCV;
+  document.getElementById('cfg-admin-user').value  = getCreds().user;
+  const key = localStorage.getItem('dg_bcvapi_key') || '';
+  document.getElementById('cfg-bcv-key').value = key ? '••••••••' : '';
+}
+
+function cfgSaveTienda() {
+  const name = document.getElementById('cfg-store-name').value.trim() || 'DG Motors';
+  const wa   = document.getElementById('cfg-wa-number').value.trim().replace(/\D/g,'') || '584140000000';
+  const tasa = parseFloat(document.getElementById('cfg-tasa-manual').value);
+  localStorage.setItem('dg_store_name', name);
+  localStorage.setItem('dg_wa_number',  wa);
+  if (!isNaN(tasa) && tasa > 0) {
+    tasaBCV   = tasa;
+    tasaFecha = new Date().toISOString().split('T')[0];
+    saveTasa();
+    updateBCVDisplay();
+  }
+  showToast('Configuración guardada ✓', 'success');
+}
+
+function cfgSaveAcceso() {
+  const newUser = document.getElementById('cfg-admin-user').value.trim();
+  const oldPass = document.getElementById('cfg-pass-old').value;
+  const newPass = document.getElementById('cfg-pass-new').value;
+  const confPass= document.getElementById('cfg-pass-confirm').value;
+  const creds   = getCreds();
+  if (oldPass !== creds.pass) { showToast('Contraseña actual incorrecta', 'err'); return; }
+  if (!newPass) { showToast('Ingresa la nueva contraseña', 'err'); return; }
+  if (newPass !== confPass) { showToast('Las contraseñas no coinciden', 'err'); return; }
+  if (newUser) localStorage.setItem('dg_admin_user', newUser);
+  localStorage.setItem('dg_admin_pass', newPass);
+  ['cfg-pass-old','cfg-pass-new','cfg-pass-confirm'].forEach(id => document.getElementById(id).value = '');
+  showToast('Credenciales actualizadas ✓', 'success');
+}
+
+function cfgSaveBCVKey() {
+  const key = document.getElementById('cfg-bcv-key').value.trim();
+  if (key && key !== '••••••••') {
+    localStorage.setItem('dg_bcvapi_key', key);
+    showToast('API Key guardada ✓', 'success');
+  } else {
+    showToast('Ingresa una API Key válida', 'err');
+  }
+}
+
+// ─── SEED DATA ────────────────────────────────────────
+function seedIfEmpty() {
+  if (products.length === 0) {
+    products = [
+      {id:1,nombre:'Carburador PE24 completo',sku:'DGM-001',categoria:'Motor',tipo:'Original',marcaRep:'Mikuni',marcaMoto:'Honda',modelo:'Wave · Fan · XR',añoDesde:2015,añoHasta:2024,cilindraje:'125cc',oem:'16100-GFC-671',descripcion:'Carburador original japonés, incluye jets y flotador.',precio:28.50,stock:12,stockMin:3,descuento:0,ubicacion:'A1',peso:0.380,largo:12,ancho:8,alto:9,publicado:true,fecha:'2024-10-01',medios:[]},
+      {id:2,nombre:'Kit de pistón 50mm std',sku:'DGM-002',categoria:'Motor',tipo:'Alternativo',marcaRep:'Top1',marcaMoto:'Yamaha',modelo:'Crux · Crypton',añoDesde:2018,añoHasta:2024,cilindraje:'110cc',oem:'',descripcion:'Kit completo: pistón, anillos, pines y clips.',precio:14.00,stock:2,stockMin:3,descuento:10,ubicacion:'A2',peso:0.520,largo:8,ancho:8,alto:6,publicado:true,fecha:'2024-10-03',medios:[]},
+      {id:3,nombre:'Bobina de encendido CDI',sku:'DGM-003',categoria:'Eléctrico',tipo:'Alternativo',marcaRep:'Daikin',marcaMoto:'Múltiples marcas',modelo:'Universal 125cc',añoDesde:2010,añoHasta:2024,cilindraje:'125cc',oem:'',descripcion:'CDI universal compatible con motos 125cc.',precio:8.00,stock:0,stockMin:2,descuento:0,ubicacion:'B3',peso:0.150,largo:7,ancho:4,alto:3,publicado:true,fecha:'2024-10-05',medios:[]},
+      {id:4,nombre:'Pastillas de freno delanteras',sku:'DGM-004',categoria:'Frenos',tipo:'Original',marcaRep:'Brembo',marcaMoto:'Honda',modelo:'CBF150 · CB190',añoDesde:2016,añoHasta:2024,cilindraje:'150cc',oem:'06455-KVK-405',descripcion:'Par de pastillas de freno disco delantero.',precio:11.00,stock:8,stockMin:4,descuento:0,ubicacion:'C1',peso:0.210,largo:9,ancho:5,alto:2,publicado:true,fecha:'2024-10-10',medios:[]},
+      {id:5,nombre:'Amortiguador trasero YSS',sku:'DGM-005',categoria:'Suspensión',tipo:'Alternativo',marcaRep:'YSS',marcaMoto:'Yamaha',modelo:'Fazer · Ys250',añoDesde:2019,añoHasta:2024,cilindraje:'250cc',oem:'',descripcion:'Amortiguador trasero con 5 posiciones de ajuste.',precio:45.00,stock:3,stockMin:2,descuento:5,ubicacion:'D2',peso:1.200,largo:32,ancho:6,alto:6,publicado:true,fecha:'2024-10-12',medios:[]},
+      {id:6,nombre:'Relay de arranque 12V 80A',sku:'DGM-006',categoria:'Eléctrico',tipo:'Genérico',marcaRep:'',marcaMoto:'Múltiples marcas',modelo:'Universal',añoDesde:2000,añoHasta:2024,cilindraje:'Todos',oem:'',descripcion:'Relay de arranque universal 12V para motos.',precio:3.50,stock:20,stockMin:5,descuento:0,ubicacion:'B1',peso:0.080,largo:5,ancho:4,alto:3,publicado:true,fecha:'2024-10-14',medios:[]},
+      {id:7,nombre:'Plato de embrague Daytona',sku:'DGM-007',categoria:'Transmisión',tipo:'Original',marcaRep:'Daytona',marcaMoto:'Daytona',modelo:'DTN200 · DTN250',añoDesde:2020,añoHasta:2024,cilindraje:'200cc',oem:'DTN-200-CL-01',descripcion:'Plato de embrague original, incluye discos y resortes.',precio:22.00,stock:5,stockMin:2,descuento:0,ubicacion:'E3',peso:0.650,largo:15,ancho:15,alto:4,publicado:true,fecha:'2024-10-16',medios:[]},
+    ];
+    saveProducts();
+  }
+  if (orders.length === 0) {
+    const d = n => new Date(Date.now()-n*86400000).toISOString();
+    orders = [
+      {id:'DGM-2024-001',cliente:{nombre:'Carlos Pérez',telefono:'0414-5551234',ciudad:'Caracas',direccion:'Av. Libertador'},items:[{productoId:1,nombre:'Carburador PE24 completo',sku:'DGM-001',qty:1,precio:28.50},{productoId:6,nombre:'Relay de arranque 12V 80A',sku:'DGM-006',qty:2,precio:3.50}],subtotal:35.50,envio:3,descuento:0,total:38.50,metodo:'zelle',pagoEstado:'pagado',refPago:'ZL-20241001',despacho:'encomienda',transportista:'MRW',estado:'entregado',nota:'',fecha:d(10)},
+      {id:'DGM-2024-002',cliente:{nombre:'María González',telefono:'0424-7778899',ciudad:'Maracay',direccion:'Urb. Las Delicias'},items:[{productoId:4,nombre:'Pastillas de freno delanteras',sku:'DGM-004',qty:2,precio:11.00}],subtotal:22.00,envio:2,descuento:0,total:24.00,metodo:'pago_movil',pagoEstado:'pagado',refPago:'PM-8872991',despacho:'encomienda',transportista:'Zoom',estado:'despachado',nota:'Urgente',fecha:d(3)},
+      {id:'DGM-2024-003',cliente:{nombre:'Luis Rodríguez',telefono:'0412-3334455',ciudad:'Valencia',direccion:'Av. Bolívar Norte'},items:[{productoId:5,nombre:'Amortiguador trasero YSS',sku:'DGM-005',qty:1,precio:45.00}],subtotal:45.00,envio:5,descuento:5,total:45.00,metodo:'usdt',pagoEstado:'parcial',refPago:'',despacho:'domicilio',transportista:'',estado:'confirmado',nota:'Paga el resto al recibir',fecha:d(1)},
+      {id:'DGM-2024-004',cliente:{nombre:'Ana Martínez',telefono:'0416-9990011',ciudad:'Barquisimeto',direccion:''},items:[{productoId:2,nombre:'Kit de pistón 50mm std',sku:'DGM-002',qty:1,precio:14.00},{productoId:7,nombre:'Plato de embrague Daytona',sku:'DGM-007',qty:1,precio:22.00}],subtotal:36.00,envio:4,descuento:0,total:40.00,metodo:'transferencia',pagoEstado:'pendiente',refPago:'',despacho:'encomienda',transportista:'Domesa',estado:'pendiente',nota:'',fecha:d(0)},
+    ];
+    saveOrders();
+  }
+  if (clients.length === 0) {
+    clients = [
+      {id:'C-101',nombre:'Carlos Pérez',telefono:'0414-5551234',ciudad:'Caracas',email:'carlos@gmail.com',direccion:'Av. Libertador',cedula:'V-10234567',metodo:'zelle',marca:'Honda',modelo:'Wave 125',año:2020,color:'Rojo',segmento:'frecuente',tags:'Motor',notas:'',fechaCreacion:new Date(Date.now()-15*86400000).toISOString()},
+      {id:'C-102',nombre:'María González',telefono:'0424-7778899',ciudad:'Maracay',email:'',direccion:'Urb. Las Delicias',cedula:'',metodo:'pago_movil',marca:'Yamaha',modelo:'Crux',año:2019,color:'Azul',segmento:'frecuente',tags:'Frenos',notas:'',fechaCreacion:new Date(Date.now()-30*86400000).toISOString()},
+      {id:'C-103',nombre:'Roberto Silva',telefono:'0412-6667788',ciudad:'Maracaibo',email:'',direccion:'',cedula:'',metodo:'usdt',marca:'Yamaha',modelo:'Crux',año:2021,color:'Azul',segmento:'vip',tags:'Motor,Transmisión',notas:'Cliente mayorista',fechaCreacion:new Date(Date.now()-60*86400000).toISOString()},
+      {id:'C-104',nombre:'Ana Martínez',telefono:'0416-9990011',ciudad:'Barquisimeto',email:'',direccion:'',cedula:'',metodo:'transferencia',marca:'Daytona',modelo:'DTN200',año:2022,color:'Negro',segmento:'nuevo',tags:'',notas:'',fechaCreacion:new Date().toISOString()},
+    ];
+    saveClients();
+  }
+  if (movements.length === 0) {
+    const today = new Date().toISOString();
+    movements = [
+      {id:1,tipo:'entrada',productoId:1,producto:'Carburador PE24 completo',cantidad:10,nota:'Compra inicial',ref:'Dist. Centro',costo:22.00,fecha:today,stockPrevio:2,stockNuevo:12},
+      {id:2,tipo:'salida',productoId:4,producto:'Pastillas de freno delanteras',cantidad:2,nota:'Venta presencial',ref:'',costo:0,fecha:today,stockPrevio:10,stockNuevo:8},
+    ];
+    saveMov();
+  }
+}
+
+// ─── SHARED UTILS ─────────────────────────────────────
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(t._tid);
+  t._tid = setTimeout(() => t.classList.remove('show'), 2800);
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeBD(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+// ─── AUTO-REGISTER CLIENT ON ORDER ────────────────────
+function autoRegisterClient(order) {
+  const tel = order.cliente.telefono;
+  if (!clients.find(c => c.telefono === tel)) {
+    clients.push({
+      id: 'C-' + Date.now(),
+      nombre: order.cliente.nombre,
+      telefono: tel,
+      ciudad: order.cliente.ciudad || '',
+      email: '', direccion: order.cliente.direccion || '',
+      cedula: '', metodo: order.metodo || '',
+      marca: '', modelo: '', año: '', color: '',
+      segmento: 'nuevo', tags: '', notas: '',
+      fechaCreacion: new Date().toISOString(),
+    });
+    saveClients();
+  }
+}
+
+// ─── WA NUMBER ────────────────────────────────────────
+function getWANumber() {
+  return localStorage.getItem('dg_wa_number') || '584140000000';
+}
+
+// ─── PLACEHOLDER RENDERS (overridden below) ───────────
+function renderCatalogo()  { /* overridden in catalog script */ }
+function invRenderStock()  { /* overridden in inventory script */ }
+function renderPedidos()   { /* overridden in orders script */ }
+function renderClientes()  { /* overridden in clients script */ }
+
+// ─── INIT ─────────────────────────────────────────────
+(function init() {
+  if (sessionStorage.getItem('dg_admin_logged') === '1') {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-app').style.display    = 'flex';
+    document.getElementById('admin-app').style.flexDirection = 'column';
+    loadData();
+    seedIfEmpty();
+    const lastTab = localStorage.getItem('dg_active_tab') || 'catalogo';
+    switchTab(lastTab);
+    updateBCVDisplay();
+  }
+})();
+</script>
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCRIPT — CATÁLOGO MODULE                           -->
+<!-- ═══════════════════════════════════════════════════ -->
+<script>
+// ── STATE ─────────────────────────────────────────────
+const catState = {
+  filter:      'todas',
+  stockFilter: null,
+  marcaFilter: null,
+  page:        1,
+  editingId:   null,
+  mediaFiles:  [],
+};
+const CAT_PER_PAGE = 10;
+
+// ── HELPERS ───────────────────────────────────────────
+const catBadgeStyle = {
+  'Motor':       'background:#1A2A3A;color:#5B9BD5',
+  'Eléctrico':   'background:#1A2A1A;color:#5BD57A',
+  'Transmisión': 'background:#2A1A2A;color:#D55BB5',
+  'Frenos':      'background:#2A1A1A;color:#D5795B',
+  'Carrocería':  'background:#2A2A1A;color:#D5C45B',
+  'Suspensión':  'background:#1A2A2A;color:#5BD5C4',
+};
+
+// ── FILTERS ───────────────────────────────────────────
+function catGetFiltered() {
+  let list = [...products];
+  const q = (document.getElementById('cat-search')?.value || '').toLowerCase();
+  if (q) list = list.filter(p =>
+    p.nombre.toLowerCase().includes(q) ||
+    (p.sku||'').toLowerCase().includes(q) ||
+    (p.modelo||'').toLowerCase().includes(q) ||
+    (p.marcaMoto||'').toLowerCase().includes(q) ||
+    (p.categoria||'').toLowerCase().includes(q)
+  );
+  if (catState.filter !== 'todas') list = list.filter(p => p.categoria === catState.filter);
+  if (catState.stockFilter === 'ok')  list = list.filter(p => p.stock > (p.stockMin||3));
+  if (catState.stockFilter === 'low') list = list.filter(p => p.stock > 0 && p.stock <= (p.stockMin||3));
+  if (catState.stockFilter === 'out') list = list.filter(p => p.stock === 0);
+  if (catState.marcaFilter) {
+    const m = catState.marcaFilter.toLowerCase();
+    list = list.filter(p => (p.marcaMoto||'').toLowerCase().includes(m) || (p.nombre||'').toLowerCase().includes(m));
+  }
+  const sort = document.getElementById('cat-sort')?.value || 'nombre';
+  if      (sort === 'nombre')  list.sort((a,b) => a.nombre.localeCompare(b.nombre));
+  else if (sort === 'precio')  list.sort((a,b) => a.precio - b.precio);
+  else if (sort === 'stock')   list.sort((a,b) => b.stock - a.stock);
+  else                         list.sort((a,b) => (b.id||0) - (a.id||0));
+  return list;
+}
+
+function catFilterCat(cat, el) {
+  catState.filter = cat;
+  catState.stockFilter = null;
+  catState.marcaFilter = null;
+  catState.page = 1;
+  document.querySelectorAll('#section-catalogo .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderCatalogo();
+}
+
+function catFilterStock(type, el) {
+  catState.stockFilter = (catState.stockFilter === type) ? null : type;
+  catState.filter = 'todas';
+  catState.page = 1;
+  document.querySelectorAll('#section-catalogo .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (catState.stockFilter && el) el.classList.add('active');
+  else document.querySelector('#section-catalogo .sidebar-item')?.classList.add('active');
+  renderCatalogo();
+}
+
+function catFilterMarca(marca) {
+  catState.marcaFilter = (catState.marcaFilter === marca) ? null : marca;
+  catState.page = 1;
+  const q = document.getElementById('cat-search');
+  if (q) q.value = catState.marcaFilter || '';
+  renderCatalogo();
+}
+
+// ── STATS ─────────────────────────────────────────────
+function catUpdateStats() {
+  const el = id => document.getElementById(id);
+  const cats = ['Motor','Eléctrico','Transmisión','Frenos','Suspensión','Carrocería'];
+  if (el('cat-badge-todas')) el('cat-badge-todas').textContent = products.length;
+  cats.forEach(c => { const b = el('cat-badge-'+c); if(b) b.textContent = products.filter(p=>p.categoria===c).length; });
+  if (el('cat-st-total'))  el('cat-st-total').textContent  = products.length;
+  if (el('cat-st-stock'))  el('cat-st-stock').textContent  = products.filter(p=>p.stock>(p.stockMin||3)).length;
+  if (el('cat-st-low'))    el('cat-st-low').textContent    = products.filter(p=>p.stock>0&&p.stock<=(p.stockMin||3)).length;
+  if (el('cat-st-out'))    el('cat-st-out').textContent    = products.filter(p=>p.stock===0).length;
+  if (el('cat-tasa-val'))  el('cat-tasa-val').textContent  = tasaBCV.toFixed(2) + ' Bs/USD';
+}
+
+// ── RENDER TABLE ──────────────────────────────────────
+function renderCatalogo() {
+  catUpdateStats();
+  const list  = catGetFiltered();
+  const total = list.length;
+  const pages = Math.ceil(total / CAT_PER_PAGE) || 1;
+  if (catState.page > pages) catState.page = 1;
+  const slice = list.slice((catState.page-1)*CAT_PER_PAGE, catState.page*CAT_PER_PAGE);
+
+  const tbody = document.getElementById('cat-tbody');
+  if (!tbody) return;
+
+  if (!slice.length) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><div class="empty-ico">🔧</div><p>No se encontraron productos.<br><button onclick="catFilterCat('todas',document.querySelector('#section-catalogo .sidebar-item'))" style="color:var(--red);background:none;border:none;cursor:pointer;font-size:13px;margin-top:8px">Limpiar filtros</button></p></div></td></tr>`;
+  } else {
+    tbody.innerHTML = slice.map(p => {
+      const pf  = p.descuento>0 ? (p.precio*(1-p.descuento/100)).toFixed(2) : p.precio.toFixed(2);
+      const bs  = Math.round(parseFloat(pf) * tasaBCV).toLocaleString('es-VE');
+      const bs_orig = Math.round(p.precio * tasaBCV).toLocaleString('es-VE');
+      const sty = catBadgeStyle[p.categoria] || 'background:var(--surface2);color:var(--muted)';
+      const stkColor = p.stock===0 ? '#E74C3C' : p.stock<=(p.stockMin||3) ? 'var(--amber)' : 'var(--green)';
+      const stkLbl   = p.stock===0 ? '✗ Agotado' : p.stock<=(p.stockMin||3) ? '⚠ '+p.stock+' uds' : '✓ '+p.stock+' uds';
+      const pubBadge = p.publicado===false ? '<span style="font-size:10px;color:var(--muted);margin-left:4px">[borrador]</span>' : '';
+      return `<tr>
+        <td>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="width:44px;height:44px;background:var(--surface2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🔧</div>
+            <div>
+              <div style="font-weight:600;font-size:14px;color:var(--white)">${p.nombre}${pubBadge}</div>
+              <div style="font-size:11px;color:var(--muted);font-family:monospace">${p.sku||''}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="badge" style="${sty}">${p.categoria}</span></td>
+        <td style="font-size:12px;color:var(--muted)">${p.marcaMoto||'—'} ${p.modelo?'· '+p.modelo:''}</td>
+        <td>
+          <div style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--white)">
+            ${p.descuento>0?`<span style="text-decoration:line-through;color:var(--muted);font-size:12px">$${p.precio.toFixed(2)}</span> `:''}$${pf}${p.descuento>0?` <span style="color:var(--green);font-size:11px">-${p.descuento}%</span>`:''}
+          </div>
+        </td>
+        <td style="font-size:12px;color:var(--muted)">${p.descuento>0?`<span style="text-decoration:line-through;font-size:11px">${bs_orig}</span> ${bs}`:bs} Bs</td>
+        <td><span style="font-weight:700;color:${stkColor}">${stkLbl}</span></td>
+        <td style="font-size:11px;color:var(--muted)">${p.peso?p.peso+'kg':''} ${p.largo?p.largo+'×'+p.ancho+'×'+p.alto+'cm':''}</td>
+        <td>
+          <div style="display:flex;gap:5px">
+            <button class="btn btn-ghost btn-xs" onclick="catEditProduct(${p.id})" title="Editar">✏</button>
+            <button class="btn btn-danger btn-xs" onclick="catDeleteProduct(${p.id})" title="Eliminar">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  const info = document.getElementById('cat-pag-info');
+  const btns = document.getElementById('cat-pag-btns');
+  if (info) info.textContent = `Mostrando ${slice.length} de ${total} producto${total!==1?'s':''}`;
+  if (btns) btns.innerHTML = Array.from({length:pages},(_,i)=>
+    `<button class="page-btn ${i+1===catState.page?'active':''}" onclick="catGoPage(${i+1})">${i+1}</button>`
+  ).join('');
+}
+
+function catGoPage(p) { catState.page = p; renderCatalogo(); }
+
+// ── MODAL OPEN / CLOSE ────────────────────────────────
+function catOpenModal(id = null) {
+  catState.editingId = id;
+  catState.mediaFiles = [];
+  document.getElementById('cat-media-preview').innerHTML = '';
+  document.getElementById('cat-modal-title').textContent = id ? 'Editar producto' : 'Nuevo producto';
+
+  const clearFields = ['cat-f-nombre','cat-f-sku','cat-f-tipo','cat-f-marca-rep','cat-f-marca-moto',
+    'cat-f-modelo','cat-f-año-desde','cat-f-año-hasta','cat-f-oem','cat-f-descripcion',
+    'cat-f-precio','cat-f-precio-bs','cat-f-stock','cat-f-stock-min','cat-f-descuento',
+    'cat-f-ubicacion','cat-f-peso','cat-f-largo','cat-f-ancho','cat-f-alto'];
+
+  if (id) {
+    const p = products.find(x => x.id === id);
+    if (!p) return;
+    document.getElementById('cat-f-nombre').value      = p.nombre;
+    document.getElementById('cat-f-sku').value         = p.sku || '';
+    document.getElementById('cat-f-categoria').value   = p.categoria || '';
+    document.getElementById('cat-f-tipo').value        = p.tipo || '';
+    document.getElementById('cat-f-marca-rep').value   = p.marcaRep || '';
+    document.getElementById('cat-f-marca-moto').value  = p.marcaMoto || '';
+    document.getElementById('cat-f-modelo').value      = p.modelo || '';
+    document.getElementById('cat-f-año-desde').value   = p.añoDesde || '';
+    document.getElementById('cat-f-año-hasta').value   = p.añoHasta || '';
+    document.getElementById('cat-f-cilindraje').value  = p.cilindraje || '';
+    document.getElementById('cat-f-oem').value         = p.oem || '';
+    document.getElementById('cat-f-descripcion').value = p.descripcion || '';
+    document.getElementById('cat-f-precio').value      = p.precio;
+    document.getElementById('cat-f-precio-bs').value   = (p.precio * tasaBCV).toFixed(2) + ' Bs';
+    document.getElementById('cat-f-stock').value       = p.stock;
+    document.getElementById('cat-f-stock-min').value   = p.stockMin || '';
+    document.getElementById('cat-f-descuento').value   = p.descuento || '';
+    document.getElementById('cat-f-ubicacion').value   = p.ubicacion || '';
+    document.getElementById('cat-f-peso').value        = p.peso || '';
+    document.getElementById('cat-f-largo').value       = p.largo || '';
+    document.getElementById('cat-f-ancho').value       = p.ancho || '';
+    document.getElementById('cat-f-alto').value        = p.alto || '';
+  } else {
+    clearFields.forEach(fid => { const el = document.getElementById(fid); if (el) el.value = ''; });
+    document.getElementById('cat-f-categoria').value  = '';
+    document.getElementById('cat-f-cilindraje').value = '';
+    document.getElementById('cat-f-marca-moto').value = '';
+    document.getElementById('cat-f-tipo').value       = '';
+  }
+  document.getElementById('cat-modal').classList.add('open');
+}
+
+function catEditProduct(id) { catOpenModal(id); }
+
+function catCloseModal() {
+  document.getElementById('cat-modal').classList.remove('open');
+  catState.editingId = null;
+}
+
+// ── FORM CALC ─────────────────────────────────────────
+function catCalcBs() {
+  const usd = parseFloat(document.getElementById('cat-f-precio').value) || 0;
+  document.getElementById('cat-f-precio-bs').value = usd > 0 ? (usd * tasaBCV).toFixed(2) + ' Bs' : '';
+}
+
+// ── SAVE / DELETE ─────────────────────────────────────
+function catSaveProduct(borrador) {
+  const nombre    = document.getElementById('cat-f-nombre').value.trim();
+  const categoria = document.getElementById('cat-f-categoria').value;
+  const precio    = parseFloat(document.getElementById('cat-f-precio').value);
+  const stock     = parseInt(document.getElementById('cat-f-stock').value);
+
+  if (!nombre)                     { showToast('El nombre es obligatorio', 'err'); return; }
+  if (!categoria)                  { showToast('Selecciona una categoría', 'err'); return; }
+  if (isNaN(precio) || precio < 0) { showToast('Precio inválido', 'err'); return; }
+  if (isNaN(stock)  || stock < 0)  { showToast('Stock inválido', 'err'); return; }
+
+  const skuVal = document.getElementById('cat-f-sku').value.trim();
+  const sku    = skuVal || 'DGM-' + String(products.length + 1).padStart(3, '0');
+
+  const data = {
+    nombre, sku, categoria,
+    tipo:        document.getElementById('cat-f-tipo').value,
+    marcaRep:    document.getElementById('cat-f-marca-rep').value,
+    marcaMoto:   document.getElementById('cat-f-marca-moto').value,
+    modelo:      document.getElementById('cat-f-modelo').value,
+    añoDesde:    parseInt(document.getElementById('cat-f-año-desde').value) || null,
+    añoHasta:    parseInt(document.getElementById('cat-f-año-hasta').value) || null,
+    cilindraje:  document.getElementById('cat-f-cilindraje').value,
+    oem:         document.getElementById('cat-f-oem').value,
+    descripcion: document.getElementById('cat-f-descripcion').value,
+    precio, stock,
+    stockMin:    parseInt(document.getElementById('cat-f-stock-min').value) || 3,
+    descuento:   parseInt(document.getElementById('cat-f-descuento').value) || 0,
+    ubicacion:   document.getElementById('cat-f-ubicacion').value,
+    peso:        parseFloat(document.getElementById('cat-f-peso').value) || null,
+    largo:       parseFloat(document.getElementById('cat-f-largo').value) || null,
+    ancho:       parseFloat(document.getElementById('cat-f-ancho').value) || null,
+    alto:        parseFloat(document.getElementById('cat-f-alto').value) || null,
+    publicado:   !borrador,
+    fecha:       new Date().toISOString().split('T')[0],
+    medios:      [],
+  };
+
+  if (catState.editingId) {
+    const idx = products.findIndex(p => p.id === catState.editingId);
+    products[idx] = { ...products[idx], ...data };
+    showToast('Producto actualizado ✓', 'success');
+  } else {
+    data.id = Date.now();
+    products.push(data);
+    showToast(borrador ? 'Borrador guardado ✓' : 'Producto publicado ✓', 'success');
+  }
+  saveProducts();
+  catCloseModal();
+  renderCatalogo();
+}
+
+function catDeleteProduct(id) {
+  const p = products.find(x => x.id === id);
+  if (!p || !confirm(`¿Eliminar "${p.nombre}"?\nEsta acción no se puede deshacer.`)) return;
+  products = products.filter(x => x.id !== id);
+  saveProducts();
+  renderCatalogo();
+  showToast('Producto eliminado', 'warn');
+}
+
+// ── MEDIA UPLOAD ──────────────────────────────────────
+function catHandleFiles(e) {
+  const files   = Array.from(e.target.files);
+  const preview = document.getElementById('cat-media-preview');
+  files.forEach(file => {
+    catState.mediaFiles.push(file);
+    const thumb = document.createElement('div');
+    thumb.style.cssText = 'width:70px;height:70px;border-radius:4px;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;overflow:hidden;border:1px solid var(--border)';
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = ev => {
+        thumb.innerHTML = `<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">
+          <button onclick="this.parentNode.remove()" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer">✕</button>`;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      thumb.innerHTML = `🎥<button onclick="this.parentNode.remove()" style="position:absolute;top:2px;right:2px;background:rgba(0,0,0,.7);border:none;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer">✕</button>`;
+    }
+    preview.appendChild(thumb);
+  });
+  e.target.value = '';
+}
+
+// ── EXPORT CSV ────────────────────────────────────────
+function catExportCSV() {
+  const headers = ['SKU','Nombre','Categoría','Tipo','Marca Rep.','Marca Moto','Modelo',
+                   'Precio USD','Stock','Stock Mín','Descuento %','Ubicación','OEM','Publicado'];
+  const rows = products.map(p => [
+    p.sku, p.nombre, p.categoria, p.tipo||'', p.marcaRep||'', p.marcaMoto||'', p.modelo||'',
+    p.precio, p.stock, p.stockMin||3, p.descuento||0, p.ubicacion||'', p.oem||'',
+    p.publicado!==false?'Sí':'No'
+  ]);
+  const csv = [headers,...rows].map(r=>r.map(v=>`"${v||''}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'dg-catalogo-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  showToast('CSV exportado ✓', 'success');
+}
+</script>
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCRIPT — INVENTARIO MODULE                         -->
+<!-- ═══════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── INV STATE ─────────────────────────────────────────
+let invCurrentView = 'stock';
+let invStockFilter = 'todos';
+let invCatFilter   = 'todas';
+let invStockPage   = 1;
+const INV_PER_PAGE = 12;
+let invMMTargetId  = null;
+const invMovIcons  = { entrada:'📦', salida:'📤', ajuste:'✏', devolucion:'↩' };
+const invMovLabels = { entrada:'Entrada', salida:'Salida', ajuste:'Ajuste', devolucion:'Devolución' };
+
+// ── VIEWS ─────────────────────────────────────────────
+function invSetView(v, el) {
+  invCurrentView = v;
+  ['inv-view-stock','inv-view-historial','inv-view-reporte'].forEach(id => {
+    const d = document.getElementById(id); if (d) d.style.display = 'none';
+  });
+  const view = document.getElementById('inv-view-' + v);
+  if (view) view.style.display = 'block';
+  document.querySelectorAll('#section-inventario .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  if (v === 'stock')     invRenderStock();
+  if (v === 'historial') invRenderHist();
+  if (v === 'reporte')   invRenderReport();
+}
+
+function invSetStockFilter(f, el) {
+  invStockFilter = f;
+  invStockPage = 1;
+  document.querySelectorAll('#section-inventario .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  invRenderStock();
+}
+
+function invSetCatFilter(c, el) {
+  invCatFilter = c;
+  invStockPage = 1;
+  document.querySelectorAll('#section-inventario .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  invRenderStock();
+}
+
+// ── STATS ─────────────────────────────────────────────
+function invUpdateStats() {
+  const el = id => document.getElementById(id);
+  if (el('inv-st-total')) el('inv-st-total').textContent = products.length;
+  if (el('inv-st-ok'))    el('inv-st-ok').textContent    = products.filter(p => p.stock > (p.stockMin||3)).length;
+  if (el('inv-st-low'))   el('inv-st-low').textContent   = products.filter(p => p.stock > 0 && p.stock <= (p.stockMin||3)).length;
+  if (el('inv-st-out'))   el('inv-st-out').textContent   = products.filter(p => p.stock === 0).length;
+  if (el('inv-sb-total')) el('inv-sb-total').textContent = products.length;
+  const today = new Date().toDateString();
+  if (el('inv-st-mov'))   el('inv-st-mov').textContent   = movements.filter(m => new Date(m.fecha).toDateString() === today).length;
+  invRenderAlerts();
+}
+
+function invRenderAlerts() {
+  const alerts = products.filter(p => p.stock <= (p.stockMin||3));
+  const panel  = document.getElementById('inv-alert-panel');
+  if (!panel) return;
+  if (!alerts.length) { panel.style.display = 'none'; return; }
+  panel.style.display = 'block';
+  document.getElementById('inv-alert-list').innerHTML = alerts.map(p => `
+    <div class="alert-item">
+      <div>
+        <div class="alert-name">${p.nombre}</div>
+        <div class="alert-detail">${p.sku||''} · Stock: <strong style="color:${p.stock===0?'#E74C3C':'var(--amber)'}">${p.stock}</strong> uds · Mín: ${p.stockMin||3}</div>
+      </div>
+      <div class="alert-action">
+        <button class="btn btn-success btn-sm" onclick="invOpenMovModal('entrada',${p.id})">+ Entrada</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── STOCK TABLE ───────────────────────────────────────
+function invGetStockList() {
+  let list = [...products];
+  const q = (document.getElementById('inv-search-stock')?.value||'').toLowerCase();
+  if (q) list = list.filter(p => p.nombre.toLowerCase().includes(q) || (p.sku||'').toLowerCase().includes(q));
+  if      (invStockFilter === 'ok')  list = list.filter(p => p.stock > (p.stockMin||3));
+  else if (invStockFilter === 'low') list = list.filter(p => p.stock > 0 && p.stock <= (p.stockMin||3));
+  else if (invStockFilter === 'out') list = list.filter(p => p.stock === 0);
+  if (invCatFilter !== 'todas') list = list.filter(p => p.categoria === invCatFilter);
+  const sort = document.getElementById('inv-sort-stock')?.value || 'nombre';
+  if      (sort === 'nombre')     list.sort((a,b) => a.nombre.localeCompare(b.nombre));
+  else if (sort === 'stock-asc')  list.sort((a,b) => a.stock - b.stock);
+  else if (sort === 'stock-desc') list.sort((a,b) => b.stock - a.stock);
+  else if (sort === 'cat')        list.sort((a,b) => (a.categoria||'').localeCompare(b.categoria||''));
+  return list;
+}
+
+function invStockBadge(p) {
+  if (p.stock === 0) return '<span class="badge badge-out">Agotado</span>';
+  if (p.stock <= (p.stockMin||3)) return '<span class="badge badge-low">Stock bajo</span>';
+  return '<span class="badge badge-ok">En stock</span>';
+}
+
+function invStockBarHTML(p) {
+  const max = Math.max(p.stock, (p.stockMin||3)*3, 20);
+  const pct = Math.min(100, Math.round(p.stock/max*100));
+  const cls = p.stock===0?'bar-red': p.stock<=(p.stockMin||3)?'bar-amber':'bar-green';
+  return `<div class="stock-bar-wrap"><div class="stock-bar ${cls}" style="width:${pct}%"></div></div>`;
+}
+
+function invRenderStock() {
+  const list  = invGetStockList();
+  const total = list.length;
+  const pages = Math.ceil(total/INV_PER_PAGE)||1;
+  if (invStockPage > pages) invStockPage = 1;
+  const slice = list.slice((invStockPage-1)*INV_PER_PAGE, invStockPage*INV_PER_PAGE);
+  const tbody = document.getElementById('inv-stock-tbody');
+  if (!tbody) return;
+  if (!slice.length) {
+    tbody.innerHTML = '<tr><td colspan="8" style="padding:40px;text-align:center;color:var(--muted)">Sin productos para mostrar</td></tr>';
+  } else {
+    tbody.innerHTML = slice.map(p => {
+      const valor = (p.stock * (p.precio||0)).toFixed(2);
+      return `<tr>
+        <td>
+          <div style="font-weight:600;font-size:14px;color:var(--white)">${p.nombre}</div>
+          <div style="font-size:11px;color:var(--muted);font-family:monospace">${p.sku||''}</div>
+        </td>
+        <td style="font-size:12px;color:var(--muted)">${p.categoria||'—'}</td>
+        <td>
+          ${invStockBadge(p)}
+          <div style="margin-top:5px;display:flex;align-items:center;gap:6px">
+            <strong style="font-family:var(--font-display);font-size:18px">${p.stock}</strong>
+            <span style="font-size:11px;color:var(--muted)">uds</span>
+            ${invStockBarHTML(p)}
+          </div>
+        </td>
+        <td style="font-size:13px;color:var(--muted)">${p.stockMin||3}</td>
+        <td style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--white)">$${valor}</td>
+        <td style="font-size:12px;color:var(--muted)">${p.ubicacion||'—'}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="btn btn-success btn-sm" onclick="invOpenMovModal('entrada',${p.id})" title="Entrada rápida">+</button>
+            <input class="qty-input" type="number" min="1" value="1" id="inv-qty-${p.id}">
+            <button class="btn btn-danger btn-sm" onclick="invQuickSalida(${p.id})" title="Salida rápida">−</button>
+          </div>
+        </td>
+        <td><button class="btn btn-ghost btn-sm" onclick="invOpenMovModal('ajuste',${p.id})">Ajustar</button></td>
+      </tr>`;
+    }).join('');
+  }
+  const info = document.getElementById('inv-stock-pag-info');
+  const btns = document.getElementById('inv-stock-pag-btns');
+  if (info) info.textContent = `Mostrando ${slice.length} de ${total} productos`;
+  if (btns) btns.innerHTML = Array.from({length:pages},(_,i) =>
+    `<button class="page-btn ${i+1===invStockPage?'active':''}" onclick="invGoPage(${i+1})">${i+1}</button>`
+  ).join('');
+  invUpdateStats();
+}
+
+function invGoPage(p) { invStockPage = p; invRenderStock(); }
+
+function invQuickSalida(id) {
+  const p = products.find(x => x.id === id);
+  const qty = parseInt(document.getElementById('inv-qty-' + id)?.value) || 1;
+  if (qty <= 0) { showToast('Cantidad inválida', 'err'); return; }
+  if (qty > p.stock) { showToast('Stock insuficiente: solo hay ' + p.stock + ' uds', 'err'); return; }
+  const prev = p.stock;
+  p.stock -= qty;
+  saveProducts();
+  invLogMovement({ tipo:'salida', productoId:p.id, producto:p.nombre, cantidad:qty, nota:'Salida rápida', ref:'', costo:0, stockPrevio:prev, stockNuevo:p.stock });
+  invRenderStock();
+  showToast('−' + qty + ' uds de ' + p.nombre, 'warn');
+}
+
+// ── MOVEMENT MODAL ────────────────────────────────────
+function invOpenMovModal(tipo = 'entrada', prodId = null) {
+  invMMTargetId = prodId;
+  document.getElementById('inv-mm-tipo').value = tipo;
+  invOnTipoChange();
+  const sel = document.getElementById('inv-mm-producto');
+  sel.innerHTML = '<option value="">Seleccionar producto...</option>' +
+    products.map(p => `<option value="${p.id}" ${p.id===prodId?'selected':''}>${p.nombre} · ${p.sku||''} (stock: ${p.stock})</option>`).join('');
+  if (prodId) invOnProdChange();
+  ['inv-mm-cantidad','inv-mm-nuevo-stock','inv-mm-nota','inv-mm-ref','inv-mm-costo'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('inv-mov-modal').classList.add('open');
+}
+
+function invCloseMovModal() { document.getElementById('inv-mov-modal').classList.remove('open'); }
+
+function invOnTipoChange() {
+  const tipo = document.getElementById('inv-mm-tipo').value;
+  const titles = { entrada:'📦 Registrar entrada de stock', salida:'📤 Registrar salida de stock', ajuste:'✏ Ajuste de inventario', devolucion:'↩ Registrar devolución' };
+  document.getElementById('inv-mm-title').textContent = titles[tipo];
+  const isAjuste = tipo === 'ajuste';
+  document.getElementById('inv-mm-ajuste-group').style.display = isAjuste ? 'block' : 'none';
+  document.getElementById('inv-mm-cant-group').style.display   = isAjuste ? 'none'  : 'block';
+}
+
+function invOnProdChange() {
+  const id  = parseInt(document.getElementById('inv-mm-producto').value);
+  const p   = products.find(x => x.id === id);
+  const div = document.getElementById('inv-mm-stock-actual');
+  if (p) {
+    div.style.display = 'block';
+    const valEl = document.getElementById('inv-mm-stock-val');
+    valEl.textContent = p.stock;
+    valEl.style.color = p.stock===0?'#E74C3C':p.stock<=(p.stockMin||3)?'var(--amber)':'var(--green)';
+    if (document.getElementById('inv-mm-tipo').value === 'ajuste')
+      document.getElementById('inv-mm-nuevo-stock').value = p.stock;
+  } else {
+    div.style.display = 'none';
+  }
+}
+
+function invSaveMovimiento() {
+  const tipo   = document.getElementById('inv-mm-tipo').value;
+  const prodId = parseInt(document.getElementById('inv-mm-producto').value);
+  const p      = products.find(x => x.id === prodId);
+  if (!p) { showToast('Selecciona un producto', 'err'); return; }
+  const nota  = document.getElementById('inv-mm-nota').value.trim();
+  const ref   = document.getElementById('inv-mm-ref').value.trim();
+  const costo = parseFloat(document.getElementById('inv-mm-costo').value) || 0;
+  const prev  = p.stock;
+
+  if (tipo === 'ajuste') {
+    const nuevoStock = parseInt(document.getElementById('inv-mm-nuevo-stock').value);
+    if (isNaN(nuevoStock) || nuevoStock < 0) { showToast('Ingresa el nuevo stock', 'err'); return; }
+    p.stock = nuevoStock;
+    invLogMovement({ tipo, productoId:p.id, producto:p.nombre, cantidad:Math.abs(nuevoStock-prev), nota:nota||'Ajuste de inventario', ref, costo, stockPrevio:prev, stockNuevo:p.stock });
+    showToast('Stock ajustado a ' + p.stock + ' uds', 'warn');
+  } else {
+    const qty = parseInt(document.getElementById('inv-mm-cantidad').value);
+    if (!qty || qty <= 0) { showToast('Ingresa una cantidad válida', 'err'); return; }
+    if (tipo === 'salida' && qty > p.stock) { showToast('Sin stock suficiente', 'err'); return; }
+    if (tipo === 'entrada' || tipo === 'devolucion') p.stock += qty;
+    else if (tipo === 'salida') p.stock -= qty;
+    invLogMovement({ tipo, productoId:p.id, producto:p.nombre, cantidad:qty, nota:nota||tipo, ref, costo, stockPrevio:prev, stockNuevo:p.stock });
+    const labels = { entrada:'+'+qty+' uds añadidas', salida:'−'+qty+' uds descontadas', devolucion:'+'+qty+' uds devueltas' };
+    showToast(labels[tipo] + ' — ' + p.nombre, tipo==='salida'?'warn':'success');
+  }
+
+  saveProducts();
+  invCloseMovModal();
+  invRenderStock();
+}
+
+function invLogMovement(data) {
+  const m = { id:Date.now(), fecha:new Date().toISOString(), ...data };
+  movements.unshift(m);
+  if (movements.length > 500) movements = movements.slice(0, 500);
+  saveMov();
+}
+
+// ── HISTORIAL ─────────────────────────────────────────
+function invRenderHist() {
+  const q          = (document.getElementById('inv-search-hist')?.value||'').toLowerCase();
+  const typeFilter = document.getElementById('inv-filter-hist-type')?.value || 'todos';
+  let list = [...movements];
+  if (q) list = list.filter(m => m.producto.toLowerCase().includes(q) || (m.nota||'').toLowerCase().includes(q) || (m.ref||'').toLowerCase().includes(q));
+  if (typeFilter !== 'todos') list = list.filter(m => m.tipo === typeFilter);
+  const container = document.getElementById('inv-hist-list');
+  const empty     = document.getElementById('inv-hist-empty');
+  if (!container) return;
+  if (!list.length) { container.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  const groups = {};
+  list.forEach(m => {
+    const d = new Date(m.fecha).toLocaleDateString('es-VE', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+    if (!groups[d]) groups[d] = [];
+    groups[d].push(m);
+  });
+  container.innerHTML = Object.entries(groups).map(([date, items]) => `
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding-left:4px">${date}</div>
+      ${items.map(m => {
+        const isPos = m.tipo==='entrada'||m.tipo==='devolucion';
+        const hora  = new Date(m.fecha).toLocaleTimeString('es-VE',{hour:'2-digit',minute:'2-digit'});
+        return `<div class="history-row">
+          <div class="history-type type-${m.tipo}">${invMovIcons[m.tipo]||'•'}</div>
+          <div style="flex:1;min-width:0">
+            <div class="history-prod">${m.producto}</div>
+            <div style="font-size:11px;color:var(--muted)">${invMovLabels[m.tipo]||m.tipo}${m.nota?' · '+m.nota:''}${m.ref?' · '+m.ref:''}</div>
+            <div style="font-size:11px;color:var(--muted)">Stock: ${m.stockPrevio} → <strong style="color:var(--white)">${m.stockNuevo}</strong></div>
+          </div>
+          <div class="history-qty ${isPos?'qty-pos':'qty-neg'}">${isPos?'+':'−'}${m.cantidad}</div>
+          ${m.costo>0?`<div style="font-size:11px;color:var(--muted);min-width:70px;text-align:right">$${(m.costo*m.cantidad).toFixed(2)}</div>`:'<div style="min-width:70px"></div>'}
+          <div class="history-meta">${hora}</div>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+function invClearHistory() {
+  if (!confirm('¿Limpiar todo el historial de movimientos? Esta acción no se puede deshacer.')) return;
+  movements = [];
+  saveMov();
+  invRenderHist();
+  showToast('Historial limpiado', 'warn');
+}
+
+// ── REPORTE ───────────────────────────────────────────
+function invRenderReport() {
+  const byValor = [...products].sort((a,b) => (b.stock*b.precio)-(a.stock*a.precio)).slice(0,6);
+  const maxV    = byValor[0] ? byValor[0].stock*byValor[0].precio : 1;
+  document.getElementById('inv-rpt-valor').innerHTML = byValor.map(p => {
+    const v = p.stock*(p.precio||0);
+    return `<div class="mini-bar-row">
+      <div class="mini-bar-label" title="${p.nombre}">${p.nombre.length>18?p.nombre.slice(0,16)+'…':p.nombre}</div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${Math.round(v/maxV*100)}%;background:var(--blue)"></div></div>
+      <div class="mini-bar-val">$${v.toFixed(0)}</div>
+    </div>`;
+  }).join('');
+
+  const cats = {};
+  products.forEach(p => { cats[p.categoria||'Sin categoría'] = (cats[p.categoria||'Sin categoría']||0) + p.stock; });
+  const catArr = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const maxC   = catArr[0]?catArr[0][1]:1;
+  document.getElementById('inv-rpt-cat').innerHTML = catArr.map(([cat,qty]) =>
+    `<div class="mini-bar-row">
+      <div class="mini-bar-label">${cat}</div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${Math.round(qty/maxC*100)}%;background:var(--green)"></div></div>
+      <div class="mini-bar-val">${qty}</div>
+    </div>`).join('');
+
+  const movCount = {};
+  movements.forEach(m => { movCount[m.producto] = (movCount[m.producto]||0)+1; });
+  const movArr = Object.entries(movCount).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const maxM   = movArr[0]?movArr[0][1]:1;
+  document.getElementById('inv-rpt-mov').innerHTML = movArr.length ? movArr.map(([nom,cnt]) =>
+    `<div class="mini-bar-row">
+      <div class="mini-bar-label" title="${nom}">${nom.length>18?nom.slice(0,16)+'…':nom}</div>
+      <div class="mini-bar-track"><div class="mini-bar-fill" style="width:${Math.round(cnt/maxM*100)}%;background:var(--amber)"></div></div>
+      <div class="mini-bar-val">${cnt}</div>
+    </div>`).join('') : '<p style="color:var(--muted);font-size:13px">Sin movimientos aún</p>';
+
+  const totalUSD      = products.reduce((s,p)=>s+(p.stock*(p.precio||0)),0);
+  const totalUnidades = products.reduce((s,p)=>s+p.stock,0);
+  const agotados      = products.filter(p=>p.stock===0).length;
+  const bajos         = products.filter(p=>p.stock>0&&p.stock<=(p.stockMin||3)).length;
+  document.getElementById('inv-rpt-resumen').innerHTML = `
+    <div style="display:grid;gap:10px">
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted);font-size:13px">Valor total inventario (USD)</span>
+        <strong style="font-family:var(--font-display);font-size:18px;color:var(--white)">$${totalUSD.toFixed(2)}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted);font-size:13px">Valor total (Bs · tasa ${tasaBCV})</span>
+        <strong style="font-family:var(--font-display);font-size:15px;color:var(--amber)">${(totalUSD*tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0})} Bs</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted);font-size:13px">Total unidades en inventario</span>
+        <strong style="font-family:var(--font-display);font-size:16px;color:var(--white)">${totalUnidades} uds</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+        <span style="color:var(--muted);font-size:13px">Productos agotados</span>
+        <strong style="font-size:14px;color:#E74C3C">${agotados}</strong>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:8px 0">
+        <span style="color:var(--muted);font-size:13px">Productos con stock bajo</span>
+        <strong style="font-size:14px;color:var(--amber)">${bajos}</strong>
+      </div>
+    </div>`;
+}
+
+// ── EXPORT CSV ────────────────────────────────────────
+function invExportCSV() {
+  const headers = ['SKU','Nombre','Categoría','Stock actual','Stock mínimo','Precio USD','Valor USD','Ubicación'];
+  const rows    = products.map(p => [p.sku,p.nombre,p.categoria,p.stock,p.stockMin||3,p.precio,(p.stock*(p.precio||0)).toFixed(2),p.ubicacion||'']);
+  const csv     = [headers,...rows].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'dg-inventario-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+  showToast('CSV exportado ✓', 'success');
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCRIPT — PEDIDOS MODULE                            -->
+<!-- ═══════════════════════════════════════════════════ -->
+<script>
+// ── STATE ─────────────────────────────────────────────
+let pedFilterStatus   = 'todos';
+let pedFilterPago     = 'todos';
+let pedFilterMetodo   = 'todos';
+let pedPage           = 1;
+const PED_PER_PAGE    = 12;
+let pedOrderItems     = [];
+let pedSelectedPago   = 'pago_movil';
+let pedEditingOrderId = null;
+
+const pedStatusFlow  = ['pendiente','confirmado','preparando','despachado','entregado'];
+const pedStatusSteps = ['pendiente','confirmado','preparando','despachado','entregado'];
+const pedStatusLabel = {pendiente:'⏳ Pendiente',confirmado:'✓ Confirmado',preparando:'🔧 Preparando',despachado:'🚚 Despachado',entregado:'✅ Entregado',cancelado:'✗ Cancelado'};
+const pedStatusClass = {pendiente:'st-pendiente',confirmado:'st-confirmado',preparando:'st-preparando',despachado:'st-despachado',entregado:'st-entregado',cancelado:'st-cancelado'};
+const pedPagoLabel   = {pagado:'✓ Pagado',pendiente:'Sin pagar',parcial:'Parcial'};
+const pedPagoClass   = {pagado:'pago-pagado',pendiente:'pago-pendiente',parcial:'pago-parcial'};
+const pedMetodoLabel = {pago_movil:'📱 P.Móvil',zelle:'💵 Zelle',usdt:'₿ USDT',transferencia:'🏦 Transf.',efectivo:'💴 Efectivo',efectivo_bs:'💵 Efectivo Bs'};
+
+// ── FILTERS ───────────────────────────────────────────
+function pedSetFilter(f, el) {
+  pedFilterStatus = f;
+  pedPage = 1;
+  document.querySelectorAll('#section-pedidos .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderPedidos();
+}
+function pedSetPayFilter(f, el) {
+  pedFilterPago = f;
+  pedPage = 1;
+  document.querySelectorAll('#section-pedidos .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderPedidos();
+}
+function pedSetMetodoFilter(f, el) {
+  pedFilterMetodo = f;
+  pedPage = 1;
+  document.querySelectorAll('#section-pedidos .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderPedidos();
+}
+
+function pedGetFiltered() {
+  let list = [...orders];
+  const q = (document.getElementById('ped-search-input')?.value || '').toLowerCase();
+  if (q) list = list.filter(o =>
+    o.id.toLowerCase().includes(q) ||
+    o.cliente.nombre.toLowerCase().includes(q) ||
+    o.items.some(i => i.nombre.toLowerCase().includes(q))
+  );
+  if (pedFilterStatus !== 'todos') list = list.filter(o => o.estado === pedFilterStatus);
+  if (pedFilterPago   !== 'todos') list = list.filter(o => o.pagoEstado === pedFilterPago);
+  if (pedFilterMetodo !== 'todos') list = list.filter(o => o.metodo === pedFilterMetodo);
+  const sort = document.getElementById('ped-sort-sel')?.value || 'fecha-desc';
+  if      (sort === 'fecha-desc')  list.sort((a,b) => new Date(b.fecha) - new Date(a.fecha));
+  else if (sort === 'fecha-asc')   list.sort((a,b) => new Date(a.fecha) - new Date(b.fecha));
+  else if (sort === 'total-desc')  list.sort((a,b) => b.total - a.total);
+  else                             list.sort((a,b) => a.total - b.total);
+  return list;
+}
+
+// ── STATS ─────────────────────────────────────────────
+function pedUpdateStats() {
+  const el = id => document.getElementById(id);
+  const statuses = ['pendiente','confirmado','preparando','despachado','entregado','cancelado'];
+  if (el('ped-sb-todos')) el('ped-sb-todos').textContent = orders.length;
+  statuses.forEach(s => { const b = el('ped-sb-' + s); if (b) b.textContent = orders.filter(o => o.estado === s).length; });
+  if (el('ped-st-total'))  el('ped-st-total').textContent  = orders.length;
+  if (el('ped-st-pend'))   el('ped-st-pend').textContent   = orders.filter(o => o.estado === 'pendiente').length;
+  if (el('ped-st-unpaid')) el('ped-st-unpaid').textContent = orders.filter(o => o.pagoEstado === 'pendiente').length;
+  const today = new Date().toDateString();
+  const hoy = orders.filter(o => new Date(o.fecha).toDateString() === today && o.pagoEstado === 'pagado').reduce((s,o) => s + o.total, 0);
+  if (el('ped-st-hoy')) el('ped-st-hoy').textContent = '$' + hoy.toFixed(2);
+  const mes = new Date().getMonth(), yr = new Date().getFullYear();
+  const mesTotal = orders.filter(o => { const d = new Date(o.fecha); return d.getMonth()===mes && d.getFullYear()===yr && o.pagoEstado==='pagado'; }).reduce((s,o) => s + o.total, 0);
+  if (el('ped-st-mes')) el('ped-st-mes').textContent = '$' + mesTotal.toFixed(2);
+}
+
+// ── RENDER TABLE ──────────────────────────────────────
+function renderPedidos() {
+  const list  = pedGetFiltered();
+  const total = list.length;
+  const pages = Math.ceil(total / PED_PER_PAGE) || 1;
+  if (pedPage > pages) pedPage = 1;
+  const slice = list.slice((pedPage-1)*PED_PER_PAGE, pedPage*PED_PER_PAGE);
+  const tbody = document.getElementById('ped-orders-tbody');
+  if (!tbody) return;
+  if (!slice.length) {
+    tbody.innerHTML = '<tr><td colspan="10"><div class="empty"><div class="empty-ico">📋</div><p>Sin pedidos</p></div></td></tr>';
+  } else {
+    tbody.innerHTML = slice.map(o => {
+      const fecha = new Date(o.fecha).toLocaleDateString('es-VE',{day:'2-digit',month:'short',year:'numeric'});
+      const bs    = (o.total * tasaBCV).toLocaleString('es-VE',{maximumFractionDigits:0});
+      const prods = o.items.map(i => i.qty + '× ' + (i.nombre.length>20 ? i.nombre.slice(0,18)+'…' : i.nombre)).join(', ');
+      return '<tr onclick="pedOpenDetail(\'' + o.id + '\')">' +
+        '<td><strong style="font-family:var(--font-display);font-size:14px">' + o.id + '</strong></td>' +
+        '<td><div style="font-weight:600">' + o.cliente.nombre + '</div><div style="font-size:11px;color:var(--muted)">' + o.cliente.telefono + '</div></td>' +
+        '<td style="font-size:12px;color:var(--muted);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + prods + '</td>' +
+        '<td><strong style="font-family:var(--font-display);font-size:15px">$' + o.total.toFixed(2) + '</strong></td>' +
+        '<td style="font-size:12px;color:var(--muted)">' + bs + ' Bs</td>' +
+        '<td style="font-size:12px">' + (pedMetodoLabel[o.metodo] || o.metodo) + '</td>' +
+        '<td><span class="pago ' + pedPagoClass[o.pagoEstado] + '">' + pedPagoLabel[o.pagoEstado] + '</span></td>' +
+        '<td><span class="status ' + pedStatusClass[o.estado] + '">' + pedStatusLabel[o.estado] + '</span></td>' +
+        '<td style="font-size:12px;color:var(--muted)">' + fecha + '</td>' +
+        '<td onclick="event.stopPropagation()"><div style="display:flex;gap:4px">' +
+          '<button class="btn btn-ghost btn-xs" onclick="pedOpenWA(\'' + o.id + '\')" title="WhatsApp">💬</button>' +
+          '<button class="btn btn-warn btn-xs" onclick="pedQuickStatus(\'' + o.id + '\')">→</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  }
+  const info = document.getElementById('ped-pag-info');
+  const btns = document.getElementById('ped-pag-btns');
+  if (info) info.textContent = slice.length + ' de ' + total + ' pedidos';
+  if (btns) btns.innerHTML = Array.from({length:pages}, (_,i) =>
+    '<button class="page-btn ' + (i+1===pedPage?'active':'') + '" onclick="pedPage=' + (i+1) + ';renderPedidos()">' + (i+1) + '</button>'
+  ).join('');
+  pedUpdateStats();
+}
+
+// ── QUICK STATUS ADVANCE ──────────────────────────────
+function pedQuickStatus(id) {
+  const o   = orders.find(x => x.id === id);
+  const idx = pedStatusFlow.indexOf(o.estado);
+  if (idx === -1 || idx === pedStatusFlow.length-1) { showToast('Pedido ya en estado final', 'warn'); return; }
+  o.estado = pedStatusFlow[idx+1];
+  saveOrders();
+  renderPedidos();
+  showToast('Pedido → ' + pedStatusLabel[o.estado], 'success');
+}
+
+// ── ORDER ID GENERATOR ────────────────────────────────
+function pedGenId() {
+  const year = new Date().getFullYear();
+  const n    = String(orders.length + 1).padStart(3, '0');
+  return 'DGM-' + year + '-' + n;
+}
+
+// ── NEW ORDER MODAL ───────────────────────────────────
+function pedOpenNewOrder() {
+  pedEditingOrderId = null;
+  pedOrderItems     = [];
+  document.getElementById('om-title').textContent = 'Nuevo pedido';
+  ['o-nombre','o-telefono','o-ciudad','o-direccion','o-nota','o-ref-pago','o-transportista'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  document.getElementById('o-envio').value        = 0;
+  document.getElementById('o-descuento').value    = 0;
+  document.getElementById('o-pago-estado').value  = 'pendiente';
+  document.getElementById('o-despacho').value     = 'domicilio';
+  pedSelectedPago = 'pago_movil';
+  document.querySelectorAll('.pago-method').forEach(el => el.classList.toggle('selected', el.dataset.metodo === pedSelectedPago));
+  pedPopulateProductSelect();
+  pedRenderOrderItems();
+  document.getElementById('order-modal').classList.add('open');
+}
+
+function pedPopulateProductSelect() {
+  document.getElementById('om-add-prod').innerHTML =
+    '<option value="">Agregar producto...</option>' +
+    products.map(p => '<option value="' + p.id + '">' + p.nombre + ' (Stock: ' + p.stock + ') · $' + p.precio.toFixed(2) + '</option>').join('');
+}
+
+function pedAddItemToOrder() {
+  const id = parseInt(document.getElementById('om-add-prod').value);
+  if (!id) return;
+  const p = products.find(x => x.id === id);
+  if (!p) return;
+  const existing = pedOrderItems.find(i => i.productoId === id);
+  if (existing) { existing.qty++; }
+  else pedOrderItems.push({ productoId:p.id, nombre:p.nombre, sku:p.sku||'', qty:1, precio:p.precio });
+  document.getElementById('om-add-prod').value = '';
+  pedRenderOrderItems();
+}
+
+function pedRenderOrderItems() {
+  const list = document.getElementById('om-items-list');
+  if (!pedOrderItems.length) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:13px;padding:10px 0">Sin productos aún. Agrega desde el selector de arriba.</div>';
+  } else {
+    list.innerHTML = pedOrderItems.map((item, i) =>
+      '<div class="order-item">' +
+        '<div style="flex:1"><div class="oi-name">' + item.nombre + '</div><div class="oi-sku">' + item.sku + '</div></div>' +
+        '<input class="oi-qty" type="number" min="1" value="' + item.qty + '" oninput="pedUpdateQty(' + i + ',this.value)">' +
+        '<div class="oi-price">$' + (item.qty * item.precio).toFixed(2) + '</div>' +
+        '<button class="oi-remove" onclick="pedRemoveItem(' + i + ')">✕</button>' +
+      '</div>'
+    ).join('');
+  }
+  pedRecalcTotals();
+}
+
+function pedUpdateQty(i, v) {
+  pedOrderItems[i].qty = Math.max(1, parseInt(v) || 1);
+  pedRenderOrderItems();
+}
+function pedRemoveItem(i) { pedOrderItems.splice(i, 1); pedRenderOrderItems(); }
+
+function pedRecalcTotals() {
+  const sub   = pedOrderItems.reduce((s,i) => s + i.qty * i.precio, 0);
+  const envio = parseFloat(document.getElementById('o-envio')?.value) || 0;
+  const desc  = parseFloat(document.getElementById('o-descuento')?.value) || 0;
+  const total = Math.max(0, sub + envio - desc);
+  const bs    = (total * tasaBCV).toLocaleString('es-VE', {maximumFractionDigits:0});
+  const omSub = document.getElementById('om-subtotal');
+  if (omSub) {
+    omSub.textContent = '$' + sub.toFixed(2);
+    document.getElementById('om-total').textContent    = '$' + total.toFixed(2);
+    document.getElementById('om-total-bs').textContent = bs + ' Bs';
+  }
+}
+
+function pedSelectPago(el) {
+  pedSelectedPago = el.dataset.metodo;
+  document.querySelectorAll('.pago-method').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ── SAVE ORDER ────────────────────────────────────────
+function pedSaveOrder(estado) {
+  const nombre   = document.getElementById('o-nombre').value.trim();
+  const telefono = document.getElementById('o-telefono').value.trim();
+  if (!nombre)              { showToast('Ingresa el nombre del cliente', 'err'); return; }
+  if (!telefono)            { showToast('Ingresa el teléfono del cliente', 'err'); return; }
+  if (!pedOrderItems.length){ showToast('Agrega al menos un producto', 'err'); return; }
+  const sub   = pedOrderItems.reduce((s,i) => s + i.qty * i.precio, 0);
+  const envio = parseFloat(document.getElementById('o-envio').value)     || 0;
+  const desc  = parseFloat(document.getElementById('o-descuento').value) || 0;
+  const total = Math.max(0, sub + envio - desc);
+  const order = {
+    id: pedEditingOrderId || pedGenId(),
+    cliente: {
+      nombre,
+      telefono,
+      ciudad:    document.getElementById('o-ciudad').value.trim(),
+      direccion: document.getElementById('o-direccion').value.trim(),
+    },
+    items:        [...pedOrderItems],
+    subtotal:     sub, envio, descuento: desc, total,
+    metodo:       pedSelectedPago,
+    pagoEstado:   document.getElementById('o-pago-estado').value,
+    refPago:      document.getElementById('o-ref-pago').value.trim(),
+    despacho:     document.getElementById('o-despacho').value,
+    transportista:document.getElementById('o-transportista').value.trim(),
+    estado,
+    nota:         document.getElementById('o-nota').value.trim(),
+    fecha:        new Date().toISOString(),
+  };
+  if (pedEditingOrderId) {
+    const idx = orders.findIndex(o => o.id === pedEditingOrderId);
+    orders[idx] = order;
+    showToast('Pedido actualizado ✓', 'success');
+  } else {
+    orders.unshift(order);
+    autoRegisterClient(order);
+    showToast('Pedido creado: ' + order.id, 'success');
+  }
+  saveOrders();
+  closeModal('order-modal');
+  renderPedidos();
+}
+
+// ── DETAIL MODAL ──────────────────────────────────────
+function pedOpenDetail(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  document.getElementById('dm-title').textContent = 'Pedido ' + o.id;
+  const fecha    = new Date(o.fecha).toLocaleDateString('es-VE', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const bs       = (o.total * tasaBCV).toLocaleString('es-VE', {maximumFractionDigits:0});
+  const stepIdx  = pedStatusSteps.indexOf(o.estado);
+
+  const itemsHTML = o.items.map(i =>
+    '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border)">' +
+      '<div><div style="font-weight:600;font-size:13px">' + i.nombre + '</div>' +
+      '<div style="font-size:11px;color:var(--muted)">' + i.sku + ' · ' + i.qty + ' uds × $' + i.precio.toFixed(2) + '</div></div>' +
+      '<div style="font-family:var(--font-display);font-size:15px;font-weight:700">$' + (i.qty*i.precio).toFixed(2) + '</div>' +
+    '</div>'
+  ).join('');
+
+  const tlHTML = pedStatusSteps.map((s, i) => {
+    const done = (i < stepIdx) || o.estado === 'entregado';
+    const curr = (i === stepIdx) && o.estado !== 'entregado' && o.estado !== 'cancelado';
+    const cls  = done ? 'done' : curr ? 'current' : 'pending';
+    const col  = curr ? 'var(--amber)' : done ? 'var(--green)' : 'var(--muted)';
+    return '<div class="tl-item">' +
+      '<div style="display:flex;flex-direction:column;align-items:center">' +
+        '<div class="tl-dot ' + cls + '"></div>' +
+        (i < pedStatusSteps.length-1 ? '<div class="tl-line" style="height:24px"></div>' : '') +
+      '</div>' +
+      '<div class="tl-content" style="padding-top:0"><div class="tl-label" style="color:' + col + '">' + pedStatusLabel[s] + '</div></div>' +
+    '</div>';
+  }).join('') + (o.estado === 'cancelado' ?
+    '<div class="tl-item"><div class="tl-dot" style="background:#E74C3C"></div>' +
+    '<div class="tl-content"><div class="tl-label" style="color:#E74C3C">✗ Cancelado</div></div></div>' : '');
+
+  const statusBtns = pedStatusSteps.map(s =>
+    '<button class="btn btn-ghost btn-sm ' + (o.estado===s?'btn-primary':'') + '" onclick="pedChangeStatus(\'' + o.id + '\',\'' + s + '\')">' + pedStatusLabel[s] + '</button>'
+  ).join('') + '<button class="btn btn-danger btn-sm" onclick="pedChangeStatus(\'' + o.id + '\',\'cancelado\')">✗ Cancelar</button>';
+
+  document.getElementById('dm-body').innerHTML =
+    '<div class="detail-grid">' +
+      '<div class="detail-item"><div class="detail-key">Cliente</div><div class="detail-val">' + o.cliente.nombre + '</div></div>' +
+      '<div class="detail-item"><div class="detail-key">Teléfono</div><div class="detail-val">' + o.cliente.telefono + '</div></div>' +
+      '<div class="detail-item"><div class="detail-key">Ciudad</div><div class="detail-val">' + (o.cliente.ciudad||'—') + '</div></div>' +
+      '<div class="detail-item"><div class="detail-key">Dirección</div><div class="detail-val" style="font-size:12px">' + (o.cliente.direccion||'—') + '</div></div>' +
+      '<div class="detail-item"><div class="detail-key">Método de pago</div><div class="detail-val">' + (pedMetodoLabel[o.metodo]||o.metodo) + '</div></div>' +
+      '<div class="detail-item"><div class="detail-key">Estado de pago</div><div class="detail-val"><span class="pago ' + pedPagoClass[o.pagoEstado] + '">' + pedPagoLabel[o.pagoEstado] + '</span>' + (o.refPago ? ' · '+o.refPago : '') + '</div></div>' +
+      '<div class="detail-item"><div class="detail-key">Despacho</div><div class="detail-val">' + o.despacho + (o.transportista?' · '+o.transportista:'') + '</div></div>' +
+      '<div class="detail-item"><div class="detail-key">Fecha</div><div class="detail-val" style="font-size:12px">' + fecha + '</div></div>' +
+    '</div>' +
+    (o.nota ? '<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:4px;padding:10px 14px;margin-bottom:12px;font-size:13px;color:var(--muted)">💬 ' + o.nota + '</div>' : '') +
+    '<div style="font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Productos</div>' +
+    '<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:14px">' +
+      itemsHTML +
+      '<div style="padding:10px 14px;display:flex;flex-direction:column;gap:4px;align-items:flex-end">' +
+        '<div style="font-size:12px;color:var(--muted)">Subtotal: $' + o.subtotal.toFixed(2) + '</div>' +
+        (o.envio ? '<div style="font-size:12px;color:var(--muted)">Envío: $' + o.envio.toFixed(2) + '</div>' : '') +
+        (o.descuento ? '<div style="font-size:12px;color:var(--green)">Descuento: −$' + o.descuento.toFixed(2) + '</div>' : '') +
+        '<div style="font-family:var(--font-display);font-size:20px;font-weight:700">$' + o.total.toFixed(2) + '</div>' +
+        '<div style="font-size:12px;color:var(--muted)">' + bs + ' Bs</div>' +
+      '</div>' +
+    '</div>' +
+    '<div style="font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Progreso del pedido</div>' +
+    '<div class="timeline">' + tlHTML + '</div>' +
+    '<div style="margin-top:14px">' +
+      '<div style="font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px">Cambiar estado</div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' + statusBtns + '</div>' +
+    '</div>';
+
+  document.getElementById('dm-footer').innerHTML =
+    '<a class="wa-btn" href="' + pedBuildWALink(o) + '" target="_blank">💬 Enviar por WhatsApp</a>' +
+    '<div style="display:flex;gap:8px">' +
+      '<button class="btn btn-secondary btn-sm" onclick="pedPrintOrder(\'' + o.id + '\')">🖨 Imprimir</button>' +
+      '<button class="btn btn-ghost" onclick="closeModal(\'detail-modal\')">Cerrar</button>' +
+    '</div>';
+
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function pedChangeStatus(id, estado) {
+  const o = orders.find(x => x.id === id);
+  o.estado = estado;
+  saveOrders();
+  renderPedidos();
+  pedOpenDetail(id);
+  showToast('Estado → ' + pedStatusLabel[estado], 'success');
+}
+
+// ── WHATSAPP ──────────────────────────────────────────
+function pedBuildWALink(o) {
+  const bs     = (o.total * tasaBCV).toLocaleString('es-VE', {maximumFractionDigits:0});
+  const prods  = o.items.map(i => '  • ' + i.qty + '× ' + i.nombre + ' — $' + (i.qty*i.precio).toFixed(2)).join('\n');
+  const mLabel = {pago_movil:'Pago Móvil',zelle:'Zelle',usdt:'USDT/Cripto',transferencia:'Transferencia bancaria',efectivo:'Efectivo USD',efectivo_bs:'Efectivo Bs'};
+  const msg = '🔧 *DG Motors* — Pedido ' + o.id + '\n\n' +
+    'Hola ' + o.cliente.nombre + ', aquí el resumen de tu pedido:\n\n' +
+    '*Productos:*\n' + prods + '\n\n' +
+    '💵 *Total: $' + o.total.toFixed(2) + ' USD*\n' +
+    '📊 *Equivalente: ' + bs + ' Bs* (tasa BCV)\n\n' +
+    '💳 *Método de pago:* ' + (mLabel[o.metodo] || o.metodo) + '\n' +
+    '🚚 *Despacho:* ' + o.despacho + (o.transportista ? ' · ' + o.transportista : '') + '\n' +
+    (o.cliente.ciudad ? '📍 *Destino:* ' + o.cliente.ciudad + '\n' : '') + '\n' +
+    '_Para confirmar tu pedido, realiza el pago y envíanos el comprobante._\n\n' +
+    '¡Gracias por tu compra! 🙏';
+  const tel  = o.cliente.telefono.replace(/\D/g, '');
+  const intl = tel.startsWith('0') ? '58' + tel.slice(1) : tel;
+  return 'https://wa.me/' + intl + '?text=' + encodeURIComponent(msg);
+}
+
+function pedOpenWA(id) {
+  const o = orders.find(x => x.id === id);
+  window.open(pedBuildWALink(o), '_blank');
+}
+
+function pedPrintOrder(id) {
+  showToast('Función de impresión próximamente', 'warn');
+}
+
+// ── EXPORT CSV ────────────────────────────────────────
+function pedExportCSV() {
+  const headers = ['ID','Cliente','Teléfono','Ciudad','Productos','Subtotal','Envío','Descuento','Total USD','Total Bs','Método Pago','Estado Pago','Ref Pago','Estado','Despacho','Fecha'];
+  const rows = orders.map(o => [
+    o.id, o.cliente.nombre, o.cliente.telefono, o.cliente.ciudad,
+    o.items.map(i => i.qty + '× ' + i.nombre).join(' | '),
+    o.subtotal, o.envio, o.descuento, o.total.toFixed(2),
+    (o.total * tasaBCV).toFixed(0),
+    o.metodo, o.pagoEstado, o.refPago, o.estado, o.despacho,
+    new Date(o.fecha).toLocaleDateString('es-VE')
+  ]);
+  const csv = [headers, ...rows].map(r => r.map(v => '"' + (v||'') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['﻿' + csv], {type:'text/csv;charset=utf-8;'}));
+  a.download = 'dg-pedidos-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  showToast('CSV exportado ✓', 'success');
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════ -->
+<!--  SCRIPT — CLIENTES MODULE                           -->
+<!-- ═══════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+// ── CLI STATE ─────────────────────────────────────────
+let cliSegFilter    = 'todos';
+let cliCityFilter   = 'todas';
+let cliMetodoFilter = 'todos';
+let cliViewMode     = 'grid';
+let cliCurrentPage  = 1;
+const CLI_PER_PAGE  = 12;
+let cliEditingId    = null;
+
+// ── CLIENT STATS ──────────────────────────────────────
+function cliClientStats(c) {
+  const myOrders = orders.filter(o => o.cliente.telefono === c.telefono);
+  const total    = myOrders.reduce((s,o) => s + (o.pagoEstado==='pagado' ? o.total : 0), 0);
+  const ultimo   = myOrders.length ? myOrders.sort((a,b) => new Date(b.fecha)-new Date(a.fecha))[0] : null;
+  return { count: myOrders.length, total, ultimo };
+}
+
+// ── AVATAR ────────────────────────────────────────────
+const cliAvatarColors = [
+  ['#1A2A3A','#5B9BD5'],['#1A2A1A','#5BD57A'],['#2A1A1A','#D5795B'],
+  ['#2A1A2A','#D55BB5'],['#1A2A2A','#5BD5C4'],['#2A1A00','#F39C12'],
+];
+function cliAvatarColor(name) {
+  return cliAvatarColors[name.charCodeAt(0) % cliAvatarColors.length];
+}
+function cliInitials(name) {
+  return name.split(' ').slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+
+// ── FILTERS ───────────────────────────────────────────
+function cliSetSeg(s, el) {
+  cliSegFilter = s; cliCurrentPage = 1;
+  document.querySelectorAll('#section-clientes .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderClientes();
+}
+function cliSetMetodo(m, el) {
+  cliMetodoFilter = m; cliCurrentPage = 1;
+  document.querySelectorAll('#section-clientes .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderClientes();
+}
+function cliSetCityFilter(c, el) {
+  cliCityFilter = c; cliCurrentPage = 1;
+  document.querySelectorAll('#section-clientes .sidebar-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderClientes();
+}
+
+function cliBuildCityFilters() {
+  const cities    = [...new Set(clients.map(c=>c.ciudad).filter(Boolean))].sort();
+  const container = document.getElementById('city-filters');
+  if (!container) return;
+  container.innerHTML =
+    `<div class="sidebar-item ${cliCityFilter==='todas'?'active':''}" onclick="cliSetCityFilter('todas',this)">Todas</div>` +
+    cities.map(city =>
+      `<div class="sidebar-item ${cliCityFilter===city?'active':''}" onclick="cliSetCityFilter(${JSON.stringify(city)},this)">${city}</div>`
+    ).join('');
+}
+
+function cliGetFiltered() {
+  let list = [...clients];
+  const q  = (document.getElementById('search-input')?.value || '').toLowerCase();
+  if (q) list = list.filter(c =>
+    c.nombre.toLowerCase().includes(q) ||
+    c.telefono.includes(q) ||
+    (c.ciudad||'').toLowerCase().includes(q)
+  );
+  if (cliSegFilter    !== 'todos')  list = list.filter(c => c.segmento === cliSegFilter);
+  if (cliCityFilter   !== 'todas')  list = list.filter(c => c.ciudad === cliCityFilter);
+  if (cliMetodoFilter !== 'todos')  list = list.filter(c => c.metodo === cliMetodoFilter);
+  const sort = document.getElementById('sort-sel')?.value || 'nombre';
+  if      (sort === 'nombre')  list.sort((a,b) => a.nombre.localeCompare(b.nombre));
+  else if (sort === 'pedidos') list.sort((a,b) => cliClientStats(b).count - cliClientStats(a).count);
+  else if (sort === 'gasto')   list.sort((a,b) => cliClientStats(b).total - cliClientStats(a).total);
+  else                         list.sort((a,b) => new Date(b.fechaCreacion) - new Date(a.fechaCreacion));
+  return list;
+}
+
+// ── STATS ─────────────────────────────────────────────
+function cliUpdateStats() {
+  const el = id => document.getElementById(id);
+  if (el('st-total'))     el('st-total').textContent     = clients.length;
+  if (el('st-vip'))       el('st-vip').textContent       = clients.filter(c=>c.segmento==='vip').length;
+  if (el('sb-todos'))     el('sb-todos').textContent     = clients.length;
+  if (el('sb-vip'))       el('sb-vip').textContent       = clients.filter(c=>c.segmento==='vip').length;
+  if (el('sb-frecuente')) el('sb-frecuente').textContent = clients.filter(c=>c.segmento==='frecuente').length;
+  if (el('sb-nuevo'))     el('sb-nuevo').textContent     = clients.filter(c=>c.segmento==='nuevo').length;
+  if (el('sb-inactivo'))  el('sb-inactivo').textContent  = clients.filter(c=>c.segmento==='inactivo').length;
+  const totalIngresos = clients.reduce((s,c) => s + cliClientStats(c).total, 0);
+  if (el('st-ingresos'))  el('st-ingresos').textContent  = '$' + totalIngresos.toFixed(2);
+  const conPedidos = clients.filter(c => cliClientStats(c).count > 0);
+  const ticket     = conPedidos.length
+    ? conPedidos.reduce((s,c)=>s+cliClientStats(c).total,0) / conPedidos.reduce((s,c)=>s+cliClientStats(c).count,0)
+    : 0;
+  if (el('st-ticket'))    el('st-ticket').textContent    = '$' + ticket.toFixed(2);
+}
+
+// ── VIEW MODE ─────────────────────────────────────────
+function cliSetViewMode(mode) {
+  cliViewMode = mode;
+  const gv = document.getElementById('grid-view');
+  const lv = document.getElementById('list-view');
+  if (gv) gv.style.display = mode==='grid' ? 'block' : 'none';
+  if (lv) lv.style.display = mode==='list' ? 'block' : 'none';
+  document.getElementById('btn-grid')?.classList.toggle('active', mode==='grid');
+  document.getElementById('btn-list')?.classList.toggle('active', mode==='list');
+  renderClientes();
+}
+
+// ── RENDER ────────────────────────────────────────────
+const cliSegLabel   = {vip:'⭐ VIP',frecuente:'🔁 Frecuente',nuevo:'🆕 Nuevo',inactivo:'💤 Inactivo'};
+const cliSegColor   = {vip:'var(--amber)',frecuente:'var(--blue)',nuevo:'var(--green)',inactivo:'var(--muted)'};
+const cliMpLabel    = {pago_movil:'📱 P.Móvil',zelle:'💵 Zelle',usdt:'₿ USDT',transferencia:'🏦 Transf.',efectivo:'💴 Efectivo'};
+
+function renderClientes() {
+  cliBuildCityFilters();
+  cliUpdateStats();
+  const list  = cliGetFiltered();
+  const total = list.length;
+  const pages = Math.ceil(total / CLI_PER_PAGE) || 1;
+  if (cliCurrentPage > pages) cliCurrentPage = 1;
+  const slice = list.slice((cliCurrentPage-1)*CLI_PER_PAGE, cliCurrentPage*CLI_PER_PAGE);
+
+  if (cliViewMode === 'grid') {
+    const grid = document.getElementById('clients-grid');
+    if (!grid) return;
+    if (!slice.length) {
+      grid.innerHTML = '<div class="empty" style="grid-column:1/-1"><p>Sin clientes para mostrar</p></div>';
+    } else {
+      grid.innerHTML = slice.map(c => {
+        const st    = cliClientStats(c);
+        const [bg,fg] = cliAvatarColor(c.nombre);
+        const tags  = (c.tags||'').split(',').filter(Boolean);
+        const isVip = c.segmento === 'vip';
+        return `<div class="client-card ${isVip?'vip':''}" onclick="cliOpenDetail('${c.id}')">
+          ${isVip ? '<div class="vip-badge">⭐ VIP</div>' : ''}
+          <div class="card-header">
+            <div class="client-avatar" style="background:${bg};color:${fg}">${cliInitials(c.nombre)}</div>
+            <div style="flex:1;min-width:0">
+              <div class="card-name">${c.nombre}</div>
+              <div class="card-phone">${c.telefono}</div>
+              <div class="card-city">${c.ciudad||'—'}</div>
+            </div>
+          </div>
+          ${tags.length ? `<div style="margin-bottom:6px">${tags.map(t=>`<span class="tag tag-${t.trim().toLowerCase()}">${t.trim()}</span>`).join('')}</div>` : ''}
+          <div class="card-stats">
+            <div class="cs-item"><div class="cs-val" style="color:var(--white)">${st.count}</div><div class="cs-label">Pedidos</div></div>
+            <div class="cs-item"><div class="cs-val" style="color:var(--green)">$${st.total.toFixed(0)}</div><div class="cs-label">Gastado</div></div>
+            <div class="cs-item"><div class="cs-val" style="color:${cliSegColor[c.segmento]};font-size:11px">${cliSegLabel[c.segmento]||'—'}</div><div class="cs-label">Tipo</div></div>
+          </div>
+          <div class="card-actions" onclick="event.stopPropagation()">
+            <a class="btn btn-wa btn-sm" href="${cliBuildWALink(c,'')}" target="_blank">💬 WA</a>
+            <button class="btn btn-ghost btn-sm" onclick="cliEditClient('${c.id}')">✏ Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="cliDeleteClient('${c.id}')">🗑</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    const pig = document.getElementById('pag-info-grid');
+    if (pig) pig.textContent = `Mostrando ${slice.length} de ${total} clientes`;
+  } else {
+    const tbody = document.getElementById('clients-tbody');
+    if (!tbody) return;
+    if (!slice.length) {
+      tbody.innerHTML = '<tr><td colspan="9" style="padding:40px;text-align:center;color:var(--muted)">Sin clientes</td></tr>';
+    } else {
+      tbody.innerHTML = slice.map(c => {
+        const st     = cliClientStats(c);
+        const ultimo = st.ultimo ? new Date(st.ultimo.fecha).toLocaleDateString('es-VE',{day:'2-digit',month:'short'}) : '—';
+        const [bg,fg] = cliAvatarColor(c.nombre);
+        return `<tr onclick="cliOpenDetail('${c.id}')">
+          <td>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="width:34px;height:34px;font-size:13px;background:${bg};color:${fg};border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${cliInitials(c.nombre)}</div>
+              <div><div style="font-weight:600">${c.nombre}</div><div style="font-size:11px;color:var(--muted)">${c.email||''}</div></div>
+            </div>
+          </td>
+          <td style="font-size:12px">${c.telefono}</td>
+          <td style="font-size:12px;color:var(--muted)">${c.ciudad||'—'}</td>
+          <td style="font-family:var(--font-display);font-size:16px;font-weight:700">${st.count}</td>
+          <td style="font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--green)">$${st.total.toFixed(2)}</td>
+          <td style="font-size:12px;color:var(--muted)">${ultimo}</td>
+          <td style="font-size:12px">${cliMpLabel[c.metodo]||'—'}</td>
+          <td><span style="font-size:12px;color:${cliSegColor[c.segmento]}">${cliSegLabel[c.segmento]||'—'}</span></td>
+          <td onclick="event.stopPropagation()">
+            <div style="display:flex;gap:4px">
+              <a class="btn btn-wa btn-xs" href="${cliBuildWALink(c,'')}" target="_blank">💬</a>
+              <button class="btn btn-ghost btn-xs" onclick="cliEditClient('${c.id}')">✏</button>
+              <button class="btn btn-danger btn-xs" onclick="cliDeleteClient('${c.id}')">🗑</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    const info = document.getElementById('pag-info');
+    const btns = document.getElementById('pag-btns');
+    if (info) info.textContent = `${slice.length} de ${total} clientes`;
+    if (btns) btns.innerHTML = Array.from({length:pages}, (_,i) =>
+      `<button class="page-btn ${i+1===cliCurrentPage?'active':''}" onclick="cliCurrentPage=${i+1};renderClientes()">${i+1}</button>`
+    ).join('');
+  }
+}
+
+// ── CLIENT DETAIL ─────────────────────────────────────
+function cliOpenDetail(id) {
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  const st        = cliClientStats(c);
+  const [bg,fg]   = cliAvatarColor(c.nombre);
+  const myOrders  = orders.filter(o => o.cliente.telefono === c.telefono)
+                          .sort((a,b) => new Date(b.fecha)-new Date(a.fecha));
+  const stClass   = {pendiente:'st-pendiente',confirmado:'st-confirmado',preparando:'st-preparando',despachado:'st-despachado',entregado:'st-entregado',cancelado:'st-cancelado'};
+  const stLabel   = {pendiente:'⏳ Pendiente',confirmado:'✓ Confirmado',preparando:'🔧 Preparando',despachado:'🚚 Despachado',entregado:'✅ Entregado',cancelado:'✗ Cancelado'};
+
+  document.getElementById('cli-dm-title').textContent = c.nombre;
+  document.getElementById('cli-dm-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px">
+      <div style="width:60px;height:60px;font-size:22px;background:${bg};color:${fg};border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">${cliInitials(c.nombre)}</div>
+      <div>
+        <div style="font-family:var(--font-display);font-size:22px;font-weight:700">${c.nombre}</div>
+        <div style="color:var(--muted);font-size:13px">${c.telefono}${c.email?' · '+c.email:''}</div>
+        <div style="margin-top:4px"><span style="font-size:12px;color:${cliSegColor[c.segmento]};font-weight:700">${cliSegLabel[c.segmento]}</span>${c.ciudad?' · '+c.ciudad:''}</div>
+      </div>
+    </div>
+    <div class="detail-grid">
+      <div class="detail-item"><div class="detail-key">Total pedidos</div><div class="detail-val" style="font-family:var(--font-display);font-size:24px">${st.count}</div></div>
+      <div class="detail-item"><div class="detail-key">Total gastado</div><div class="detail-val" style="font-family:var(--font-display);font-size:24px;color:var(--green)">$${st.total.toFixed(2)}</div></div>
+      <div class="detail-item"><div class="detail-key">Vehículo</div><div class="detail-val" style="font-size:13px">${c.marca ? c.marca+' '+c.modelo+' '+c.año : '—'}</div></div>
+      <div class="detail-item"><div class="detail-key">Pago preferido</div><div class="detail-val" style="font-size:13px">${cliMpLabel[c.metodo]||'—'}</div></div>
+      ${c.direccion ? `<div class="detail-item" style="grid-column:1/-1"><div class="detail-key">Dirección</div><div class="detail-val" style="font-size:13px">${c.direccion}</div></div>` : ''}
+    </div>
+    ${c.notas ? `<div style="background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--amber);border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--muted)">📝 ${c.notas}</div>` : ''}
+    <div style="font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin:16px 0 10px">Historial de pedidos</div>
+    ${myOrders.length ? myOrders.map(o => `
+      <div class="order-mini">
+        <div>
+          <div style="font-weight:600;font-size:13px">${o.id}</div>
+          <div style="font-size:11px;color:var(--muted)">${o.items.map(i=>i.qty+'× '+i.nombre).join(', ')}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="st-pill ${stClass[o.estado]}">${stLabel[o.estado]}</span>
+          <strong style="font-family:var(--font-display);font-size:15px">$${o.total.toFixed(2)}</strong>
+        </div>
+      </div>`).join('') : '<p style="color:var(--muted);font-size:13px">Sin pedidos registrados aún.</p>'}`;
+
+  document.getElementById('cli-dm-footer').innerHTML = `
+    <a class="btn btn-wa" href="${cliBuildWALink(c,'')}" target="_blank">💬 Abrir WhatsApp</a>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-secondary btn-sm" onclick="cliEditClient('${c.id}');closeModal('cli-detail-modal')">✏ Editar</button>
+      <button class="btn btn-ghost" onclick="closeModal('cli-detail-modal')">Cerrar</button>
+    </div>`;
+
+  document.getElementById('cli-detail-modal').classList.add('open');
+}
+
+// ── NEW / EDIT CLIENT ─────────────────────────────────
+function cliOpenNewClient() {
+  cliEditingId = null;
+  document.getElementById('cm-title').textContent = 'Nuevo cliente';
+  ['c-nombre','c-telefono','c-ciudad','c-email','c-direccion','c-cedula','c-modelo','c-color','c-tags','c-notas']
+    .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.getElementById('c-metodo').value   = '';
+  document.getElementById('c-marca').value    = '';
+  document.getElementById('c-año').value      = '';
+  document.getElementById('c-segmento').value = 'nuevo';
+  document.getElementById('client-modal').classList.add('open');
+}
+
+function cliEditClient(id) {
+  const c = clients.find(x => x.id === id);
+  if (!c) return;
+  cliEditingId = id;
+  document.getElementById('cm-title').textContent    = 'Editar cliente';
+  document.getElementById('c-nombre').value          = c.nombre;
+  document.getElementById('c-telefono').value        = c.telefono;
+  document.getElementById('c-ciudad').value          = c.ciudad    || '';
+  document.getElementById('c-email').value           = c.email     || '';
+  document.getElementById('c-direccion').value       = c.direccion || '';
+  document.getElementById('c-cedula').value          = c.cedula    || '';
+  document.getElementById('c-metodo').value          = c.metodo    || '';
+  document.getElementById('c-marca').value           = c.marca     || '';
+  document.getElementById('c-modelo').value          = c.modelo    || '';
+  document.getElementById('c-año').value             = c.año       || '';
+  document.getElementById('c-color').value           = c.color     || '';
+  document.getElementById('c-segmento').value        = c.segmento  || 'nuevo';
+  document.getElementById('c-tags').value            = c.tags      || '';
+  document.getElementById('c-notas').value           = c.notas     || '';
+  document.getElementById('client-modal').classList.add('open');
+}
+
+function cliSaveClient() {
+  const nombre   = document.getElementById('c-nombre').value.trim();
+  const telefono = document.getElementById('c-telefono').value.trim();
+  if (!nombre)   { showToast('Nombre obligatorio', 'err'); return; }
+  if (!telefono) { showToast('Teléfono obligatorio', 'err'); return; }
+  const data = {
+    nombre, telefono,
+    ciudad:        document.getElementById('c-ciudad').value.trim(),
+    email:         document.getElementById('c-email').value.trim(),
+    direccion:     document.getElementById('c-direccion').value.trim(),
+    cedula:        document.getElementById('c-cedula').value.trim(),
+    metodo:        document.getElementById('c-metodo').value,
+    marca:         document.getElementById('c-marca').value,
+    modelo:        document.getElementById('c-modelo').value.trim(),
+    año:           document.getElementById('c-año').value,
+    color:         document.getElementById('c-color').value.trim(),
+    segmento:      document.getElementById('c-segmento').value,
+    tags:          document.getElementById('c-tags').value.trim(),
+    notas:         document.getElementById('c-notas').value.trim(),
+    fechaCreacion: new Date().toISOString(),
+  };
+  if (cliEditingId) {
+    const idx = clients.findIndex(c => c.id === cliEditingId);
+    clients[idx] = { ...clients[idx], ...data };
+    showToast('Cliente actualizado ✓', 'success');
+  } else {
+    data.id = 'C-' + Date.now();
+    clients.push(data);
+    showToast('Cliente guardado ✓', 'success');
+  }
+  saveClients();
+  closeModal('client-modal');
+  renderClientes();
+}
+
+function cliDeleteClient(id) {
+  const c = clients.find(x => x.id === id);
+  if (!confirm(`¿Eliminar a "${c.nombre}"?`)) return;
+  clients = clients.filter(x => x.id !== id);
+  saveClients();
+  renderClientes();
+  showToast('Cliente eliminado', 'warn');
+}
+
+// ── WHATSAPP ──────────────────────────────────────────
+function cliBuildWALink(c, msg) {
+  const tel  = c.telefono.replace(/\D/g, '');
+  const intl = tel.startsWith('0') ? '58' + tel.slice(1) : tel;
+  const text = msg || `Hola ${c.nombre.split(' ')[0]}, te contactamos desde *DG Motors* 🔧`;
+  return `https://wa.me/${intl}?text=${encodeURIComponent(text)}`;
+}
+
+// ── BROADCAST ─────────────────────────────────────────
+function cliOpenBroadcast() {
+  document.getElementById('bc-modal').classList.add('open');
+  document.getElementById('bc-msg').oninput       = cliUpdateBCPreview;
+  document.getElementById('bc-segmento').onchange = cliUpdateBCPreview;
+  cliUpdateBCPreview();
+}
+function cliUpdateBCPreview() {
+  const seg  = document.getElementById('bc-segmento').value;
+  const msg  = document.getElementById('bc-msg').value;
+  const dest = seg === 'todos' ? clients : clients.filter(c => c.segmento === seg);
+  document.getElementById('bc-count').textContent   = dest.length + ' destinatarios';
+  const preview = dest[0] ? msg.replace(/{nombre}/g, dest[0].nombre.split(' ')[0]) : msg;
+  document.getElementById('bc-preview').textContent = preview || 'Vista previa...';
+}
+function cliSendBroadcast() {
+  const seg  = document.getElementById('bc-segmento').value;
+  const msg  = document.getElementById('bc-msg').value.trim();
+  if (!msg) { showToast('Escribe un mensaje', 'err'); return; }
+  const dest = seg === 'todos' ? clients : clients.filter(c => c.segmento === seg);
+  if (!dest.length) { showToast('Sin destinatarios', 'err'); return; }
+  dest.forEach((c, i) => {
+    setTimeout(() => {
+      window.open(cliBuildWALink(c, msg.replace(/{nombre}/g, c.nombre.split(' ')[0])), '_blank');
+    }, i * 800);
+  });
+  closeModal('bc-modal');
+  showToast(`${dest.length} enlaces WA generados ✓`, 'success');
+}
+
+// ── EXPORT CSV ────────────────────────────────────────
+function cliExportCSV() {
+  const headers = ['ID','Nombre','Teléfono','Ciudad','Email','Cédula','Marca moto','Modelo','Año','Método pago','Segmento','Pedidos','Total gastado','Notas'];
+  const rows    = clients.map(c => {
+    const st = cliClientStats(c);
+    return [c.id,c.nombre,c.telefono,c.ciudad,c.email,c.cedula,c.marca,c.modelo,c.año,c.metodo,c.segmento,st.count,st.total.toFixed(2),c.notas];
+  });
+  const csv = [headers, ...rows].map(r => r.map(v => `"${v||''}"`).join(',')).join('\n');
+  const a   = document.createElement('a');
+  a.href    = URL.createObjectURL(new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'}));
+  a.download = 'dg-clientes-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  showToast('CSV exportado ✓', 'success');
+}
+</script>
+
+</body>
+</html>

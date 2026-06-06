@@ -555,7 +555,7 @@ function openProductDetail(id) {
       ${p.oem?`<div class="pd-spec"><div class="pd-spec-key">Número OEM</div><div class="pd-spec-val" style="font-family:monospace;font-size:12px">${p.oem}</div></div>`:''}
       ${p.peso?`<div class="pd-spec"><div class="pd-spec-key">Peso</div><div class="pd-spec-val">${p.peso} kg</div></div>`:''}
       ${p.largo?`<div class="pd-spec"><div class="pd-spec-key">Dimensiones</div><div class="pd-spec-val">${p.largo}×${p.ancho}×${p.alto} cm</div></div>`:''}
-      <div class="pd-spec"><div class="pd-spec-key">Disponibilidad</div><div class="pd-spec-val" style="color:${isOut?'#E74C3C':p.stock<=3?'#B45309':'var(--green)'">${isOut?'Agotado':p.stock<=3?'Últimas unidades ('+p.stock+')':'En stock'}</div></div>
+      <div class="pd-spec"><div class="pd-spec-key">Disponibilidad</div><div class="pd-spec-val" style="color:${isOut?'#E74C3C':p.stock<=3?'#B45309':'var(--green)'}">${isOut?'Agotado':p.stock<=3?'Últimas unidades ('+p.stock+')':'En stock'}</div></div>
       <div class="pd-spec"><div class="pd-spec-key">SKU</div><div class="pd-spec-val" style="font-family:monospace;font-size:12px">${p.sku||'—'}</div></div>
     </div>`;
   document.getElementById('pd-footer').innerHTML = `
